@@ -1,5 +1,3 @@
-import { StrictMode } from "react";
-import ReactDOM from "react-dom/client";
 import {
   Outlet,
   RouterProvider,
@@ -7,25 +5,24 @@ import {
   createRoute,
   createRouter,
 } from "@tanstack/react-router";
+import { StrictMode } from "react";
+import ReactDOM from "react-dom/client";
 import StoreDemo from "./routes/demo.store.tsx";
 import TanStackQueryDemo from "./routes/demo.tanstack-query.tsx";
-
+import SettingsLLm from './routes/settings.llm'
 import * as TanStackQueryProvider from "./integrations/tanstack-query/root-provider.tsx";
 
 import "./styles.css";
 import reportWebVitals from "./reportWebVitals.ts";
 
+import MainLayout from "@/layout/MainLayout.tsx";
 import App from "./App.tsx";
 
 const rootRoute = createRootRoute({
   component: () => (
-    <>
-      {/* <Header /> */}
+    <MainLayout>
       <Outlet />
-      {/* <TanStackRouterDevtools /> */}
-
-      {/* <TanStackQueryLayout /> */}
-    </>
+    </MainLayout>
   ),
 });
 
@@ -39,6 +36,7 @@ const routeTree = rootRoute.addChildren([
   indexRoute,
   StoreDemo(rootRoute),
   TanStackQueryDemo(rootRoute),
+  SettingsLLm(rootRoute)
 ]);
 
 const router = createRouter({
