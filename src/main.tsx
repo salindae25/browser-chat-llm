@@ -7,10 +7,8 @@ import {
 } from "@tanstack/react-router";
 import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
-import StoreDemo from "./routes/demo.store.tsx";
-import TanStackQueryDemo from "./routes/demo.tanstack-query.tsx";
-import SettingsLLm from './routes/settings.llm'
 import * as TanStackQueryProvider from "./integrations/tanstack-query/root-provider.tsx";
+import SettingsLLm from './routes/settings.llm'
 
 import "./styles.css";
 import reportWebVitals from "./reportWebVitals.ts";
@@ -35,8 +33,6 @@ const indexRoute = createRoute({
 
 const routeTree = rootRoute.addChildren([
   indexRoute,
-  StoreDemo(rootRoute),
-  TanStackQueryDemo(rootRoute),
   SettingsLLm(rootRoute),
 
 ]);
