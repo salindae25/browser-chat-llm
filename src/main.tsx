@@ -26,6 +26,7 @@ const rootRoute = createRootRoute({
   ),
 });
 
+
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/",
@@ -36,7 +37,8 @@ const routeTree = rootRoute.addChildren([
   indexRoute,
   StoreDemo(rootRoute),
   TanStackQueryDemo(rootRoute),
-  SettingsLLm(rootRoute)
+  SettingsLLm(rootRoute),
+
 ]);
 
 const router = createRouter({
