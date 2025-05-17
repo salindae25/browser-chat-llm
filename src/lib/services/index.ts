@@ -1,7 +1,7 @@
 import { type CoreAssistantMessage, type CoreMessage, type CoreUserMessage, generateText, streamText } from "ai";
 import { activeChatStore, messageStore } from "../chat-store";
 import {db} from "../db"
-import { llm,titleLlm } from "./providers";
+import { getChatLlm, getTitleLlm } from "./providers"; // Import the async functions
 
 export const fetchChat = async () => {
 	messageStore.setState((s) => {
@@ -18,8 +18,24 @@ export const fetchChat = async () => {
 		titleGenerate();
 	}
 	
+	const currentLlm = await getChatLlm();
+	if (!currentLlm) {
+		console.error("Chat LLM not available.");
+		activeChatStore.setState((s) => ({ ...s, generating: false, activeMessage: "Error: Chat LLM not configured or available." }));
+		// Optionally, update messageStore to reflect the error to the user
+		messageStore.setState((s) => {
+			const errorMessage: CoreAssistantMessage = {
+				role: "assistant",
+				content: "Error: Chat LLM is not configured or available. Please check settings.",
+			};
+			const messages = [...s.messages, errorMessage];
+			return { ...s, messages, generating: false };
+		});
+		return;
+	}
+
 	const { textStream } = streamText({
-		model: llm,
+		model: currentLlm,
 		system: "You are a helpful assistant.",
 		messages: messageStore.state.messages,
 	});
@@ -42,8 +58,15 @@ export const fetchChat = async () => {
 	activeChatStore.setState((s) => ({ ...s, generating: false }));
 };
 export const titleGenerate = async () => {
+	const currentTitleLlm = await getTitleLlm();
+	if (!currentTitleLlm) {
+		console.error("Title LLM not available. Cannot generate title.");
+		// Potentially update the chat session with a default title or skip title generation
+		db.chatSessions.update(activeChatStore.state.chatId, { title: "Chat (auto-title failed)" });
+		return;
+	}
 	const { text } = await generateText({
-		model: titleLlm,
+		model: currentTitleLlm,
 		system: "You are a helpful assistant. Who can generate a title for this chat session based on the messages. it should be simple and short. no more that 4 words. don't include quotes. only the title.",
 		prompt: `Messages: ${messageStore.state.messages.map((message) => message.content).join("\n")}`,
 	});
@@ -51,13 +74,29 @@ export const titleGenerate = async () => {
 	db.chatSessions.update(activeChatStore.state.chatId, { title: text });
 }
 export const createNewChatSession = async () => {
+    const currentChatLlm = await getChatLlm();
+    let activeModelDetails = { model: 'default-model', provider: 'unknown' };
+    if (currentChatLlm) {
+        // The modelId and provider are not directly exposed on the LanguageModel type in the same way.
+        // We need to fetch the config used to create this LLM or make assumptions.
+        // For now, let's try to get the config for 'lmstudio' or the first enabled one.
+        let config = await db.llmProviders.get('lmstudio');
+        if (!config || !config.enabled) {
+            const enabledProviders = await db.llmProviders.where('enabled').equals(1).toArray();
+            if (enabledProviders.length > 0) config = enabledProviders[0];
+        }
+        if (config) {
+            activeModelDetails = {
+                model: config.defaultModel || 'default-model',
+                provider: config.providerKey, // Use providerKey which matches the 'name' in createOpenAICompatible
+            };
+        }
+    }
+
     const newChatId = await db.chatSessions.add({
-        id: crypto.randomUUID(), // Add this line to generate a unique ID
+        id: crypto.randomUUID(),
         title: "New Chat",
-        activeModel: {
-            model: llm.modelId,
-            provider: llm.provider,
-        },
+        activeModel: activeModelDetails,
         projectId: undefined,
         tags: [],
         createdAt: new Date(),

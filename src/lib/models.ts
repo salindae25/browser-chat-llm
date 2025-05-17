@@ -20,6 +20,16 @@ export interface Project {
 export interface Profile {
   providers: Record<string, { url: string; apiKey: string; name: string }>;
 }
+export interface LLMProviderConfig {
+  id: string; // Unique identifier, e.g., 'openai', 'lmstudio'
+  name: string; // Display name, e.g., "OpenAI", "LM Studio"
+  providerKey: string; // Internal key matching createOpenAICompatible names, e.g., "openai", "lmstudio", "ollama", "gemini"
+  apiKey?: string;
+  baseURL?: string;
+  defaultModel?: string;
+  enabled: boolean;
+}
+
 export interface User extends Profile {
   id: string;
   username: string;
