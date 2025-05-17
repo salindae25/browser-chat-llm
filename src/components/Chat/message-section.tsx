@@ -27,7 +27,7 @@ const MessageItem = ({ data }: { data: CoreMessage }) => {
 			})}
 		>
 			<div
-				className={cn( {
+				className={cn({
 					"max-w-[85%] flex-1 sm:max-w-[75%]": isUserMessage,
 					"max-w-full flex-1": !isUserMessage,
 				})}

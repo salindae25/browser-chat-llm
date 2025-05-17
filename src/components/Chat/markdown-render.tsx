@@ -3,7 +3,7 @@ import {
 	type HTMLAttributes,
 	type ReactNode,
 	useCallback,
-	useState
+	useState,
 } from "react";
 import Markdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
@@ -11,7 +11,10 @@ import { gruvboxLight } from "react-syntax-highlighter/dist/esm/styles/prism";
 import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
 
-export default function MarkdownRenderer({ children, includeRaw }: { children: string, includeRaw?: boolean }) {
+export default function MarkdownRenderer({
+	children,
+	includeRaw,
+}: { children: string; includeRaw?: boolean }) {
 	return (
 		<Markdown
 			remarkPlugins={[remarkGfm]}
@@ -35,12 +38,18 @@ export default function MarkdownRenderer({ children, includeRaw }: { children: s
 					</li>
 				),
 				ol: ({ children, ...props }: HTMLAttributes<HTMLOListElement>) => (
-					<ol className="text-base font-medium my-2 pl-1 list-decimal" {...props}>
+					<ol
+						className="text-base font-medium my-2 pl-1 list-decimal"
+						{...props}
+					>
 						{children}
 					</ol>
 				),
 				ul: ({ children, ...props }: HTMLAttributes<HTMLUListElement>) => (
-					<ul className="text-base font-medium my-2 pl-1 list-disc list-inside marker:text-amber-800" {...props}>
+					<ul
+						className="text-base font-medium my-2 pl-1 list-disc list-inside marker:text-amber-800"
+						{...props}
+					>
 						{children}
 					</ul>
 				),
@@ -72,43 +81,60 @@ export default function MarkdownRenderer({ children, includeRaw }: { children: s
 				p: (props: HTMLAttributes<HTMLParagraphElement>) => {
 					const { children, ...rest } = props;
 					return (
-						<p
-							className="text-base font-medium my-1"
-							{...rest}
-						>
+						<p className="text-base font-medium my-1" {...rest}>
 							{children}
 						</p>
 					);
-				},table: ({ children, ...props }: HTMLAttributes<HTMLTableElement>) => (
+				},
+				table: ({ children, ...props }: HTMLAttributes<HTMLTableElement>) => (
 					// Added a wrapper div for responsiveness with horizontal scrolling
 					<div className="overflow-x-auto my-2">
-						<table className="table-auto border-collapse border border-gray-400 w-full" {...props}>
+						<table
+							className="table-auto border-collapse border border-gray-400 w-full"
+							{...props}
+						>
 							{children}
 						</table>
 					</div>
 				),
-				thead: ({ children, ...props }: HTMLAttributes<HTMLTableSectionElement>) => (
+				thead: ({
+					children,
+					...props
+				}: HTMLAttributes<HTMLTableSectionElement>) => (
 					<thead className="bg-gray-200" {...props}>
 						{children}
 					</thead>
 				),
-				tbody: ({ children, ...props }: HTMLAttributes<HTMLTableSectionElement>) => (
-					<tbody {...props}>
-						{children}
-					</tbody>
+				tbody: ({
+					children,
+					...props
+				}: HTMLAttributes<HTMLTableSectionElement>) => (
+					<tbody {...props}>{children}</tbody>
 				),
 				tr: ({ children, ...props }: HTMLAttributes<HTMLTableRowElement>) => (
 					<tr className="border-b border-gray-300" {...props}>
 						{children}
 					</tr>
 				),
-				th: ({ children, ...props }: HTMLAttributes<HTMLTableHeaderCellElement>) => (
-					<th className="px-4 py-2 text-left font-semibold border-r border-gray-300 last:border-r-0" {...props}>
+				th: ({
+					children,
+					...props
+				}: HTMLAttributes<HTMLTableHeaderCellElement>) => (
+					<th
+						className="px-4 py-2 text-left font-semibold border-r border-gray-300 last:border-r-0"
+						{...props}
+					>
 						{children}
 					</th>
 				),
-				td: ({ children, ...props }: HTMLAttributes<HTMLTableDataCellElement>) => (
-					<td className="px-4 py-2 border-r border-gray-300 last:border-r-0" {...props}>
+				td: ({
+					children,
+					...props
+				}: HTMLAttributes<HTMLTableDataCellElement>) => (
+					<td
+						className="px-4 py-2 border-r border-gray-300 last:border-r-0"
+						{...props}
+					>
 						{children}
 					</td>
 				),

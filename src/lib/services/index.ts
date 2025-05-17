@@ -1,3 +1,4 @@
+import type { UseNavigateResult } from "@tanstack/react-router";
 import {
 	type CoreAssistantMessage,
 	type CoreMessage,
@@ -102,8 +103,10 @@ export const titleGenerate = async (chatId?: string) => {
 };
 export const createNewChatSession = async () => {
 	const generalSettings = await db.generalSettings.get("global");
-	const chatModelId =activeChatStore.state.chatModelId ?? generalSettings?.chatLlmModelId;
-	const chatProvider = activeChatStore.state.chatProvider ?? generalSettings?.chatLlmProviderId;
+	const chatModelId =
+		activeChatStore.state.chatModelId ?? generalSettings?.chatLlmModelId;
+	const chatProvider =
+		activeChatStore.state.chatProvider ?? generalSettings?.chatLlmProviderId;
 	const newChatId = await db.chatSessions.add({
 		id: crypto.randomUUID(),
 		title: "New Chat",
@@ -116,7 +119,12 @@ export const createNewChatSession = async () => {
 		chatProvider: chatProvider,
 		forkedChatIds: undefined,
 	});
-	activeChatStore.setState((s) => ({ ...s, chatId: newChatId,chatModelId:chatModelId,chatProvider:chatProvider }));
+	activeChatStore.setState((s) => ({
+		...s,
+		chatId: newChatId,
+		chatModelId: chatModelId,
+		chatProvider: chatProvider,
+	}));
 	messageStore.setState((s) => ({ ...s, messages: [] }));
 };
 export const loadChatSession = async (chatId: string) => {
@@ -124,18 +132,23 @@ export const loadChatSession = async (chatId: string) => {
 	if (!chatSession) {
 		return;
 	}
-	activeChatStore.setState((s) => ({ ...s, chatId: chatId,chatModelId:chatSession.chatModelId,chatProvider:chatSession.chatProvider }));
+	activeChatStore.setState((s) => ({
+		...s,
+		chatId: chatId,
+		chatModelId: chatSession.chatModelId,
+		chatProvider: chatSession.chatProvider,
+	}));
 	messageStore.setState((s) => ({ ...s, messages: chatSession.messages }));
 };
 export const deleteChatSession = async (
 	chatId: string,
-	navigate: (to: string) => void,
+	navigate: UseNavigateResult<string>,
 ) => {
 	await db.chatSessions.delete(chatId);
 	if (activeChatStore.state.chatId === chatId) {
 		activeChatStore.setState((s) => ({ ...s, chatId: "" }));
 		messageStore.setState((s) => ({ ...s, messages: [] }));
-		navigate("/");
+		navigate({ to: "/" });
 	}
 };
 export const updateChatSessionMessages = async (

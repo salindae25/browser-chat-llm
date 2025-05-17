@@ -1,4 +1,4 @@
-import { activeChatStore, modelStore } from "@/lib/chat-store";
+import { activeChatStore } from "@/lib/chat-store";
 import { db } from "@/lib/db";
 import { fetchChat } from "@/lib/services";
 import { useStore } from "@tanstack/react-store";
@@ -6,7 +6,13 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { ArrowUpIcon, CircleStop } from "lucide-react";
 import { memo, useRef } from "react";
 import { Button } from "../ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "../ui/select";
 import { Textarea } from "../ui/textarea";
 
 export const ChatInput = memo(() => {
@@ -29,17 +35,16 @@ export const ChatInput = memo(() => {
 		event,
 	) => {
 		if (event.key === "Enter") {
-			
 			if (
 				!activeChatStore.state.generating &&
 				activeChatStore.state.userMessage.trim().length !== 0 &&
 				!event.shiftKey
 			) {
 				event.preventDefault();
-			event.stopPropagation();
+				event.stopPropagation();
 				await onSend();
 			} else {
-				if(!event.shiftKey){
+				if (!event.shiftKey) {
 					event.preventDefault();
 					event.stopPropagation();
 				}
@@ -67,20 +72,19 @@ export const ChatInput = memo(() => {
 						const model = availableModels?.find((m) => m.id === value);
 						activeChatStore.setState((s) => ({
 							...s,
-							chatModelId:model?.modelId || "",
-							chatProvider:model?.providerId || "",
+							chatModelId: model?.modelId || "",
+							chatProvider: model?.providerId || "",
 						}));
 						await db.chatSessions.update(activeChatStore.state.chatId, {
-							chatModelId:model?.modelId || "",
-							chatProvider:model?.providerId || "",
-						});	
+							chatModelId: model?.modelId || "",
+							chatProvider: model?.providerId || "",
+						});
 					}}
-
 				>
 					<SelectTrigger className="w-[180px] truncate" title={chatModelId}>
 						<SelectValue placeholder="Select a model" />
 					</SelectTrigger>
-					<SelectContent>	
+					<SelectContent>
 						{availableModels?.map((model) => (
 							<SelectItem key={model.id} value={model.id}>
 								{model.modelId}
