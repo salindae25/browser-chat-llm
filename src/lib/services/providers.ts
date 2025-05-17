@@ -1,10 +1,9 @@
-
-import { createGoogleGenerativeAI } from '@ai-sdk/google';
-import { createGroq } from '@ai-sdk/groq';
-import { createOpenAI } from '@ai-sdk/openai';
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { createGroq } from "@ai-sdk/groq";
+import { createOpenAI } from "@ai-sdk/openai";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import type { LanguageModel } from "ai";
-import { activeChatStore } from '../chat-store';
+import { activeChatStore } from "../chat-store";
 import { db } from "../db";
 import type { LLMProviderConfig } from "../models";
 
@@ -14,35 +13,35 @@ const createProvider = (config: LLMProviderConfig) => {
 		console.warn(`Provider ${config.name} is disabled.`);
 		return null;
 	}
-  if(!config.baseURL){
-    return null
-  }
-  switch (config.providerKey) {
-    case 'google':
-      return createGoogleGenerativeAI({
-        apiKey: config.apiKey,
-      });
-	case 'gemini':
-		return createGoogleGenerativeAI({
-			apiKey: config.apiKey,
-		  });
-	case 'groq':
-		return createGroq({
-			apiKey: config.apiKey,
-		  });
-    case 'openai':
-      return createOpenAI({
-        name: config.providerKey, // Use providerKey for the 'name' in createOpenAICompatible
-        apiKey: config.apiKey,
-        baseURL: config.baseURL,
-			})
+	if (!config.baseURL) {
+		return null;
+	}
+	switch (config.providerKey) {
+		case "google":
+			return createGoogleGenerativeAI({
+				apiKey: config.apiKey,
+			});
+		case "gemini":
+			return createGoogleGenerativeAI({
+				apiKey: config.apiKey,
+			});
+		case "groq":
+			return createGroq({
+				apiKey: config.apiKey,
+			});
+		case "openai":
+			return createOpenAI({
+				name: config.providerKey, // Use providerKey for the 'name' in createOpenAICompatible
+				apiKey: config.apiKey,
+				baseURL: config.baseURL,
+			});
 		default:
-      return createOpenAICompatible({
-        name: config.providerKey, // Use providerKey for the 'name' in createOpenAICompatible
-        apiKey: config.apiKey,
-        baseURL: config.baseURL,
-      })
-		}
+			return createOpenAICompatible({
+				name: config.providerKey, // Use providerKey for the 'name' in createOpenAICompatible
+				apiKey: config.apiKey,
+				baseURL: config.baseURL,
+			});
+	}
 };
 
 // Function to get a specific LLM instance
@@ -66,12 +65,12 @@ export const getLLMInstance = async (
 
 export const getChatLlm = async (): Promise<LanguageModel | null> => {
 	const generalSettings = await db.generalSettings.get("global");
-	const modelId =activeChatStore.state.chatModelId??generalSettings?.chatLlmModelId;
-	const providerId = activeChatStore.state.chatProvider??generalSettings?.chatLlmProviderId;
+	const modelId =
+		activeChatStore.state.chatModelId ?? generalSettings?.chatLlmModelId;
+	const providerId =
+		activeChatStore.state.chatProvider ?? generalSettings?.chatLlmProviderId;
 	if (modelId && providerId) {
-		const config = await db.llmProviders.get(
-			providerId,
-		);
+		const config = await db.llmProviders.get(providerId);
 		if (config?.enabled) {
 			const provider = createProvider(config);
 			if (provider) {
@@ -96,12 +95,10 @@ export const getChatLlm = async (): Promise<LanguageModel | null> => {
 
 export const getTitleLlm = async (): Promise<LanguageModel | null> => {
 	const generalSettings = await db.generalSettings.get("global");
-	const modelId = generalSettings?.titleLlmModelId
-	const providerId = generalSettings?.titleLlmProviderId
+	const modelId = generalSettings?.titleLlmModelId;
+	const providerId = generalSettings?.titleLlmProviderId;
 	if (modelId && providerId) {
-		const config = await db.llmProviders.get(
-			providerId,
-		);
+		const config = await db.llmProviders.get(providerId);
 		if (config?.enabled) {
 			const provider = createProvider(config);
 			if (provider) {
@@ -133,5 +130,3 @@ export const getTitleLlm = async (): Promise<LanguageModel | null> => {
 
 export const llm = getChatLlm();
 export const titleLlm = getTitleLlm();
-
-

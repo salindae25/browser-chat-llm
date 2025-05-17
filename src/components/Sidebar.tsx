@@ -1,7 +1,6 @@
 import {
 	BadgeCheck,
 	Bell,
-	Brain,
 	ChevronsUpDown,
 	CogIcon,
 	CreditCard,
@@ -11,7 +10,7 @@ import {
 	Sparkles,
 	Trash,
 } from "lucide-react";
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -84,7 +83,8 @@ const ChatSessionItem = ({
 	const onDeleteChat = async (e: React.MouseEvent | React.KeyboardEvent) => {
 		e.stopPropagation();
 		e.preventDefault();
-		await deleteChatSession(chatSession.id, navigate as any);
+
+		await deleteChatSession(chatSession.id, navigate);
 		toast.success("Chat deleted successfully");
 		// check if there are any chat sessions left
 		const chatSessions = await db.chatSessions
@@ -149,7 +149,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 	);
 	useEffect(() => {
 		const sidebarState = localStorage.getItem(SIDEBAR_COOKIE_NAME);
-		sideBarStore.setState((s) => ({ open: sidebarState === "open" }));
+		sideBarStore.setState(() => ({ open: sidebarState === "open" }));
 	}, []);
 	const onNewChat = async () => {
 		await createNewChatSession();

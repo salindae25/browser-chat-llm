@@ -3,7 +3,7 @@ import type { LLMProviderConfig } from "@/lib/models";
 // Import Tailwind v4 via browser plugin (for example, CDN link)
 import { type RootRoute, createRoute } from "@tanstack/react-router";
 import { useLiveQuery } from "dexie-react-hooks";
-import React, { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const SettingsLLM = () => {
 	const llmProviders = useLiveQuery(() => db.llmProviders.toArray());
@@ -84,9 +84,9 @@ const SettingsLLM = () => {
 	useEffect(() => {
 		if (llmProviders) {
 			const initialSettings: Record<string, Partial<LLMProviderConfig>> = {};
-			llmProviders.forEach((p) => {
+			for (const p of llmProviders) {
 				initialSettings[p.id] = { ...p };
-			});
+			}
 			setProviderSettings(initialSettings);
 		}
 	}, [llmProviders]);

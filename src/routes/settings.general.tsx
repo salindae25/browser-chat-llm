@@ -79,7 +79,7 @@ export const SettingsGeneral = () => {
 
 				// Load available models
 				const models = (await db.llmModels.toArray()) ?? [];
-				modelStore.setState((s) => ({ models: models as LLMModel[] }));
+				modelStore.setState(() => ({ models: models as LLMModel[] }));
 			} catch (err) {
 				console.error("Error loading settings:", err);
 				toast.error("Failed to load settings");
@@ -124,7 +124,7 @@ export const SettingsGeneral = () => {
 
 			// Refresh models list
 			const updatedModels = await db.llmModels.toArray();
-			modelStore.setState((s) => ({ models: updatedModels as LLMModel[] }));
+			modelStore.setState(() => ({ models: updatedModels as LLMModel[] }));
 
 			// Clear form
 			setNewModel({ providerId: "", modelId: "" });
@@ -138,9 +138,8 @@ export const SettingsGeneral = () => {
 	// Update settings
 	const updateSettings = async (updates: Partial<GeneralAppSettings>) => {
 		try {
-		
 			await db.generalSettings.update("global", updates);
-			setSettings({...settings,...updates});
+			setSettings({ ...settings, ...updates });
 			toast.success("Settings saved successfully");
 		} catch (err) {
 			console.error("Error updating settings:", err);
@@ -246,12 +245,14 @@ export const SettingsGeneral = () => {
 										<Label>Model</Label>
 										<Select
 											value={`${settings.titleLlmProviderId}-${settings.titleLlmModelId || ""}`}
-											onValueChange={(value) =>{
-												const selectedModel = availableModels.find((model) => model.id === value)
+											onValueChange={(value) => {
+												const selectedModel = availableModels.find(
+													(model) => model.id === value,
+												);
 												updateSettings({
 													titleLlmModelId: selectedModel?.modelId || "",
 													titleLlmProviderId: selectedModel?.providerId || "",
-												})
+												});
 											}}
 										>
 											<SelectTrigger>
@@ -274,13 +275,15 @@ export const SettingsGeneral = () => {
 										<Label>Model</Label>
 										<Select
 											value={`${settings.chatLlmProviderId}-${settings.chatLlmModelId || ""}`}
-											onValueChange={(value) =>{
-												console.log(value)
-												const selectedModel = availableModels.find(m=>m.id === value)
+											onValueChange={(value) => {
+												console.log(value);
+												const selectedModel = availableModels.find(
+													(m) => m.id === value,
+												);
 												updateSettings({
 													chatLlmModelId: selectedModel?.modelId || "",
-													chatLlmProviderId:selectedModel?.providerId || ""
-												})
+													chatLlmProviderId: selectedModel?.providerId || "",
+												});
 											}}
 										>
 											<SelectTrigger>
