@@ -18,3 +18,4 @@ const GoogleProvider = createOpenAICompatible({
 // const model =GoogleProvider("gemini-2.0-flash-lite");
 export const llm = LMStudioProvider("gemma-3-4b-it-qat");
 
+export const titleLlm = LMStudioProvider("llama3.2-1b");

@@ -1,5 +1,5 @@
 import MessageLoading from "@/components/ui/message-loading";
-import { activeStore, messageStore } from "@/lib/chat-store";
+import { activeChatStore, messageStore } from "@/lib/chat-store";
 import { cn } from "@/lib/utils";
 import { useStore } from "@tanstack/react-store";
 import type { CoreMessage } from "ai";
@@ -49,8 +49,8 @@ const MessageItem = ({ data }: { data: CoreMessage }) => {
 	);
 };
 export const GeneratingMessage = memo(() => {
-	const activeMessage = useStore(activeStore, (s) => s.activeMessage);
-	const generating = useStore(activeStore, (s) => s.generating);
+	const activeMessage = useStore(activeChatStore, (s) => s.activeMessage);
+	const generating = useStore(activeChatStore, (s) => s.generating);
 	return generating ? (
 		activeMessage === "" ? (
 			<MessageLoading />

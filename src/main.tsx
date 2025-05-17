@@ -15,6 +15,7 @@ import reportWebVitals from "./reportWebVitals.ts";
 
 import MainLayout from "@/layout/MainLayout.tsx";
 import App from "./App.tsx";
+import ChatSection from "./routes/chat.section";
 
 const rootRoute = createRootRoute({
   component: () => (
@@ -33,6 +34,7 @@ const indexRoute = createRoute({
 
 const routeTree = rootRoute.addChildren([
   indexRoute,
+  ChatSection(rootRoute),
   SettingsLLm(rootRoute),
 
 ]);

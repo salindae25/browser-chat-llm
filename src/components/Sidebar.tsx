@@ -1,35 +1,17 @@
 import {
-	AudioWaveform,
 	BadgeCheck,
 	Bell,
-	BookOpen,
-	Bot,
 	Brain,
-	ChevronRight,
 	ChevronsUpDown,
-	Command,
 	CreditCard,
-	Folder,
-	Forward,
-	Frame,
-	GalleryVerticalEnd,
+	Cross,
 	LogOut,
-	Map,
-	MoreHorizontal,
-	PieChart,
 	Plus,
-	Settings2,
 	Sparkles,
-	SquareTerminal,
-	Trash2,
+	Trash,
 } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-	Collapsible,
-	CollapsibleContent,
-	CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -37,10 +19,10 @@ import {
 	DropdownMenuItem,
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
-	DropdownMenuShortcut,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+	SideBarLink,
 	Sidebar,
 	SidebarContent,
 	SidebarFooter,
@@ -48,175 +30,107 @@ import {
 	SidebarGroupLabel,
 	SidebarHeader,
 	SidebarMenu,
-	SidebarMenuAction,
 	SidebarMenuButton,
 	SidebarMenuItem,
 	SidebarMenuSub,
-	SidebarMenuSubButton,
-	SidebarMenuSubItem,
 	SidebarRail,
 	useSidebar,
 } from "@/components/ui/sidebar";
+import { activeChatStore, messageStore } from "@/lib/chat-store";
+import { db } from "@/lib/db";
+import {
+	createNewChatSession,
+	deleteChatSession,
+	updateChatSessionMessages,
+} from "@/lib/services";
 import logo from "@/logo.svg";
 import { Link } from "@tanstack/react-router";
-import * as React from "react";
+import { useNavigate } from "@tanstack/react-router";
+import { useLiveQuery } from "dexie-react-hooks";
+import { useRef } from "react";
 import { Button } from "./ui/button";
-
 // This is sample data.
+
 const data = {
 	user: {
-		name: "shadcn",
-		email: "m@example.com",
-		avatar: "/avatars/shadcn.jpg",
+		name: "Shadcn",
+		email: "shadcn@gmail.com",
 	},
-	teams: [
-		{
-			name: "Acme Inc",
-			logo: GalleryVerticalEnd,
-			plan: "Enterprise",
-		},
-		{
-			name: "Acme Corp.",
-			logo: AudioWaveform,
-			plan: "Startup",
-		},
-		{
-			name: "Evil Corp.",
-			logo: Command,
-			plan: "Free",
-		},
-	],
-	navMain: [
-		{
-			title: "Playground",
-			url: "#",
-			icon: SquareTerminal,
-			isActive: true,
-			items: [
-				{
-					title: "History",
-					url: "#",
-				},
-				{
-					title: "Starred",
-					url: "#",
-				},
-				{
-					title: "Settings",
-					url: "#",
-				},
-			],
-		},
-		{
-			title: "Models",
-			url: "#",
-			icon: Bot,
-			items: [
-				{
-					title: "Genesis",
-					url: "#",
-				},
-				{
-					title: "Explorer",
-					url: "#",
-				},
-				{
-					title: "Quantum",
-					url: "#",
-				},
-			],
-		},
-		{
-			title: "Documentation",
-			url: "#",
-			icon: BookOpen,
-			items: [
-				{
-					title: "Introduction",
-					url: "#",
-				},
-				{
-					title: "Get Started",
-					url: "#",
-				},
-				{
-					title: "Tutorials",
-					url: "#",
-				},
-				{
-					title: "Changelog",
-					url: "#",
-				},
-			],
-		},
-		{
-			title: "Settings",
-			url: "#",
-			icon: Settings2,
-			items: [
-				{
-					title: "General",
-					url: "#",
-				},
-				{
-					title: "Team",
-					url: "#",
-				},
-				{
-					title: "Billing",
-					url: "#",
-				},
-				{
-					title: "Limits",
-					url: "#",
-				},
-			],
-		},
-	],
-	projects: [],
 };
-
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 	const { isMobile } = useSidebar();
-	const [activeTeam, setActiveTeam] = React.useState(data.teams[0]);
-
-	if (!activeTeam) {
-		return null;
-	}
-
+	const navigate = useNavigate();
+	const chatSessions = useLiveQuery(() => db.chatSessions.limit(10).toArray());
+	const onNewChat = async () => {
+		await createNewChatSession();
+		navigate({to: "/chat/$chatId", params: { chatId: activeChatStore.state.chatId }});
+	};
 	return (
 		<Sidebar collapsible="icon" {...props}>
 			<SidebarHeader>
 				<Link to="/">
-				<div className="flex gap-4 items-center">
-					<div className="flex aspect-square size-10 items-center justify-center rounded-base">
-						<img src={logo} alt="logo" className="size-10 relative left-[-4px]" />
+					<div className="flex gap-4 items-center">
+						<div className="flex aspect-square size-10 items-center justify-center rounded-base">
+							<img
+								src={logo}
+								alt="logo"
+								className="size-10 relative left-[-4px]"
+							/>
+						</div>
+						<div className="grid flex-1 text-left text-sm leading-tight">
+							<span className="truncate font-heading">LLM Chat</span>
+						</div>
 					</div>
-					<div className="grid flex-1 text-left text-sm leading-tight">
-						<span className="truncate font-heading">LLM Chat</span>
-					</div>
-				</div>
 				</Link>
 			</SidebarHeader>
 			<SidebarContent>
-
 				<SidebarGroup>
-					<SidebarMenuButton className="hover:cursor-pointer outline-border text-main-foreground bg-main transition-all active:translate-x-reverseBoxShadowX active:translate-y-reverseBoxShadowY active:shadow-shadow" tooltip="Add New Chat" onClick={() => {}} >
+					<SidebarMenuButton
+						className="hover:cursor-pointer outline-border text-main-foreground bg-main transition-all active:translate-x-reverseBoxShadowX active:translate-y-reverseBoxShadowY active:shadow-shadow"
+						tooltip="Add New Chat"
+						onClick={onNewChat}
+					>
 						<Plus />
 						<span>New Chat</span>
 					</SidebarMenuButton>
 				</SidebarGroup>
 				<SidebarGroup className="h-full">
 					<SidebarGroupLabel>History</SidebarGroupLabel>
+					{chatSessions?.map((chatSession) => (
+						<Link
+							to="/chat/$chatId"
+							params={{ chatId: chatSession.id }}
+							key={chatSession.id}
+							className="group/link relative flex h-9 w-full items-center overflow-hidden rounded-lg px-2 py-1 text-sm outline-none hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-sidebar-ring hover:focus-visible:bg-sidebar-accent bg-sidebar-accent text-sidebar-accent-foreground"
+						>
+							<SidebarMenuButton className="flex items-center justify-between">
+								<span>{chatSession.title}</span>
+								<div className="pointer-events-auto absolute right-0 bottom-0 top-0 z-50 flex translate-x-full items-center justify-end text-muted-foreground transition-transform group-hover/link:-translate-x-4 group-hover/link:bg-sidebar-accent"	>
+									<Button
+										variant="noShadowNeutral"
+										size="icon"
+										onClick={(e) => {
+											e.stopPropagation();
+											
+											deleteChatSession(chatSession.id,navigate as any);
+										}}
+										className="size-4 p-2"
+									>
+										<Trash />
+									</Button>
+								</div>
+							</SidebarMenuButton>
+						</Link>
+					))}
 				</SidebarGroup>
 				<SidebarGroup className="mt-auto">
 					<SidebarGroupLabel>Settings</SidebarGroupLabel>
-				<Link to="/settings/llm-providers">
-					<SidebarMenuButton>
-						<Brain />
-						<span>LLM Provider</span>
-					</SidebarMenuButton>
-				</Link>
+					<Link to="/settings/llm-providers">
+						<SidebarMenuButton>
+							<Brain />
+							<span>LLM Provider</span>
+						</SidebarMenuButton>
+					</Link>
 				</SidebarGroup>
 			</SidebarContent>
 			<SidebarFooter>

@@ -8,10 +8,14 @@ export interface ChatSession {
   projectId: string | undefined;
   tags: string[];
   title: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 export interface Project {
   id: string;
   title: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 export interface Profile {
   providers: Record<string, { url: string; apiKey: string; name: string }>;

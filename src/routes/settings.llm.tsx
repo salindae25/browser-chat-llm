@@ -1,6 +1,6 @@
 
 // Import Tailwind v4 via browser plugin (for example, CDN link)
-import { createRoute, RootRoute } from '@tanstack/react-router'
+import { RootRoute, createRoute } from '@tanstack/react-router'
 import React, { useState } from 'react'
 
 const SettingsLLM = () => {
@@ -129,7 +129,7 @@ const SettingsLLM = () => {
         </div>
 
         {/* Submit Button */}
-        <button onClick={handleSubmit} className="mt-6 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-md transition duration-200">
+        <button type="submit" onClick={handleSubmit} className="mt-6 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-md transition duration-200">
           Save Settings
         </button>
       </main>

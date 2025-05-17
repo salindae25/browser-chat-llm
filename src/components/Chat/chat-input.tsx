@@ -1,4 +1,4 @@
-import { activeStore } from "@/lib/chat-store";
+import { activeChatStore } from "@/lib/chat-store";
 import { fetchChat } from "@/lib/services";
 import { useStore } from "@tanstack/react-store";
 import { ArrowUpIcon, CircleStop } from "lucide-react";
@@ -8,9 +8,9 @@ import { Textarea } from "../ui/textarea";
 
 export const ChatInput = memo(() => {
 	const chatRef = useRef<HTMLTextAreaElement>(null);
-  const generating = useStore(activeStore, (s) => s.generating);
+  const generating = useStore(activeChatStore, (s) => s.generating);
 	const onSend = async () => {
-		activeStore.setState((s) => ({
+		activeChatStore.setState((s) => ({
 			...s,
 			activeMessage: "",
 		}));
@@ -25,7 +25,7 @@ export const ChatInput = memo(() => {
 		if (event.key === "Enter") {
 			event.preventDefault();
 			event.stopPropagation();
-			if (!activeStore.state.generating) {
+			if (!activeChatStore.state.generating) {
 				await onSend();
 			} else {
 				return;
@@ -37,7 +37,7 @@ export const ChatInput = memo(() => {
 			<Textarea
 				ref={chatRef}
 				onChange={(e) => {
-					activeStore.setState((s) => ({
+					activeChatStore.setState((s) => ({
 						...s,
 						userMessage: e.target.value,
 					}));
