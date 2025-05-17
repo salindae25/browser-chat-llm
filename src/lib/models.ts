@@ -3,11 +3,12 @@ import type { CoreMessage } from "ai";
 export interface ChatSession {
   id: string;
   messages: CoreMessage[];
-  activeModel: { model: string; provider: string };
   forkedChatIds: string[] | undefined;
   projectId: string | undefined;
   tags: string[];
   title: string;
+  chatModelId:string|undefined,
+	chatProvider:string|undefined,
   createdAt: Date;
   updatedAt: Date;
 }
@@ -36,6 +37,13 @@ export interface GeneralAppSettings {
   titleLlmModelId?: string;    // Specific model ID for title generation,
   chatLlmProviderId?: string;
   chatLlmModelId?: string;
+}
+
+export interface LLMModel {
+  id: string;
+  providerId: string;
+  modelId: string;
+  enabled: boolean;
 }
 
 export interface User extends Profile {

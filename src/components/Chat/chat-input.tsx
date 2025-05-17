@@ -1,14 +1,20 @@
-import { activeChatStore } from "@/lib/chat-store";
+import { activeChatStore, modelStore } from "@/lib/chat-store";
+import { db } from "@/lib/db";
 import { fetchChat } from "@/lib/services";
 import { useStore } from "@tanstack/react-store";
+import { useLiveQuery } from "dexie-react-hooks";
 import { ArrowUpIcon, CircleStop } from "lucide-react";
 import { memo, useRef } from "react";
 import { Button } from "../ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Textarea } from "../ui/textarea";
 
 export const ChatInput = memo(() => {
 	const chatRef = useRef<HTMLTextAreaElement>(null);
+	const availableModels = useLiveQuery(() => db.llmModels.toArray());
 	const generating = useStore(activeChatStore, (s) => s.generating);
+	const chatModelId = useStore(activeChatStore, (s) => s.chatModelId);
+	const chatProvider = useStore(activeChatStore, (s) => s.chatProvider);
 	const onSend = async () => {
 		activeChatStore.setState((s) => ({
 			...s,
@@ -54,7 +60,34 @@ export const ChatInput = memo(() => {
 				className="border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive flex field-sizing-content rounded-md border px-3 py-2 text-base transition-[color,box-shadow] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm dark:bg-background min-h-[44px] w-full resize-none border-none bg-transparent shadow-none outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
 				style={{ maxHeight: "250px" }}
 			/>
-			<div className="flex w-full">
+			<div className="flex gap-4 w-full">
+				<Select
+					value={`${chatProvider}-${chatModelId || ""}`}
+					onValueChange={async (value) => {
+						const model = availableModels?.find((m) => m.id === value);
+						activeChatStore.setState((s) => ({
+							...s,
+							chatModelId:model?.modelId || "",
+							chatProvider:model?.providerId || "",
+						}));
+						await db.chatSessions.update(activeChatStore.state.chatId, {
+							chatModelId:model?.modelId || "",
+							chatProvider:model?.providerId || "",
+						});	
+					}}
+
+				>
+					<SelectTrigger className="w-[180px] truncate" title={chatModelId}>
+						<SelectValue placeholder="Select a model" />
+					</SelectTrigger>
+					<SelectContent>	
+						{availableModels?.map((model) => (
+							<SelectItem key={model.id} value={model.id}>
+								{model.modelId}
+							</SelectItem>
+						))}
+					</SelectContent>
+				</Select>
 				<Button
 					disabled={generating}
 					onClick={onSend}

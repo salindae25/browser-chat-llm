@@ -4,6 +4,7 @@ import { createGroq } from '@ai-sdk/groq';
 import { createOpenAI } from '@ai-sdk/openai';
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import type { LanguageModel } from "ai";
+import { activeChatStore } from '../chat-store';
 import { db } from "../db";
 import type { LLMProviderConfig } from "../models";
 
@@ -21,10 +22,14 @@ const createProvider = (config: LLMProviderConfig) => {
       return createGoogleGenerativeAI({
         apiKey: config.apiKey,
       });
-    case 'groq':
-      return createGroq({
-        apiKey: config.apiKey,
-      });
+	case 'gemini':
+		return createGoogleGenerativeAI({
+			apiKey: config.apiKey,
+		  });
+	case 'groq':
+		return createGroq({
+			apiKey: config.apiKey,
+		  });
     case 'openai':
       return createOpenAI({
         name: config.providerKey, // Use providerKey for the 'name' in createOpenAICompatible
@@ -61,14 +66,16 @@ export const getLLMInstance = async (
 
 export const getChatLlm = async (): Promise<LanguageModel | null> => {
 	const generalSettings = await db.generalSettings.get("global");
-	if (generalSettings?.chatLlmProviderId && generalSettings.chatLlmModelId) {
+	const modelId =activeChatStore.state.chatModelId??generalSettings?.chatLlmModelId;
+	const providerId = activeChatStore.state.chatProvider??generalSettings?.chatLlmProviderId;
+	if (modelId && providerId) {
 		const config = await db.llmProviders.get(
-			generalSettings.chatLlmProviderId,
+			providerId,
 		);
 		if (config?.enabled) {
 			const provider = createProvider(config);
 			if (provider) {
-				return provider(generalSettings.chatLlmModelId);
+				return provider(modelId);
 			}
 		} else if (config && !config.enabled) {
 			console.warn(
@@ -76,7 +83,7 @@ export const getChatLlm = async (): Promise<LanguageModel | null> => {
 			);
 		} else if (!config) {
 			console.warn(
-				`Globally configured chat LLM provider ID '${generalSettings.chatLlmProviderId}' not found. Falling back.`,
+				`Globally configured chat LLM provider ID '${providerId}' not found. Falling back.`,
 			);
 		}
 	} else {
@@ -89,14 +96,16 @@ export const getChatLlm = async (): Promise<LanguageModel | null> => {
 
 export const getTitleLlm = async (): Promise<LanguageModel | null> => {
 	const generalSettings = await db.generalSettings.get("global");
-	if (generalSettings?.titleLlmProviderId && generalSettings.titleLlmModelId) {
+	const modelId = generalSettings?.titleLlmModelId
+	const providerId = generalSettings?.titleLlmProviderId
+	if (modelId && providerId) {
 		const config = await db.llmProviders.get(
-			generalSettings.titleLlmProviderId,
+			providerId,
 		);
 		if (config?.enabled) {
 			const provider = createProvider(config);
 			if (provider) {
-				return provider(generalSettings.titleLlmModelId);
+				return provider(modelId);
 			}
 		} else if (config && !config.enabled) {
 			console.warn(
@@ -104,7 +113,7 @@ export const getTitleLlm = async (): Promise<LanguageModel | null> => {
 			);
 		} else if (!config) {
 			console.warn(
-				`Globally configured title LLM provider ID '${generalSettings.titleLlmProviderId}' not found. Falling back.`,
+				`Globally configured title LLM provider ID '${providerId}' not found. Falling back.`,
 			);
 		}
 	} else {

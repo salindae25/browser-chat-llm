@@ -101,37 +101,22 @@ export const titleGenerate = async (chatId?: string) => {
 	});
 };
 export const createNewChatSession = async () => {
-	const currentChatLlm = await getChatLlm();
-	let activeModelDetails = { model: "default-model", provider: "unknown" };
-	if (currentChatLlm) {
-		let config = await db.llmProviders.get("lmstudio");
-		if (!config || !config.enabled) {
-			const enabledProviders = await db.llmProviders
-				.where("enabled")
-				.equals(1)
-				.toArray();
-			if (enabledProviders.length > 0) config = enabledProviders[0];
-		}
-		if (config) {
-			activeModelDetails = {
-				model: config.defaultModel || "default-model",
-				provider: config.providerKey, // Use providerKey which matches the 'name' in createOpenAICompatible
-			};
-		}
-	}
-
+	const generalSettings = await db.generalSettings.get("global");
+	const chatModelId =activeChatStore.state.chatModelId ?? generalSettings?.chatLlmModelId;
+	const chatProvider = activeChatStore.state.chatProvider ?? generalSettings?.chatLlmProviderId;
 	const newChatId = await db.chatSessions.add({
 		id: crypto.randomUUID(),
 		title: "New Chat",
-		activeModel: activeModelDetails,
 		projectId: undefined,
 		tags: [],
 		createdAt: new Date(),
 		updatedAt: new Date(),
 		messages: [],
+		chatModelId: chatModelId,
+		chatProvider: chatProvider,
 		forkedChatIds: undefined,
 	});
-	activeChatStore.setState((s) => ({ ...s, chatId: newChatId }));
+	activeChatStore.setState((s) => ({ ...s, chatId: newChatId,chatModelId:chatModelId,chatProvider:chatProvider }));
 	messageStore.setState((s) => ({ ...s, messages: [] }));
 };
 export const loadChatSession = async (chatId: string) => {
@@ -139,7 +124,7 @@ export const loadChatSession = async (chatId: string) => {
 	if (!chatSession) {
 		return;
 	}
-	activeChatStore.setState((s) => ({ ...s, chatId: chatId }));
+	activeChatStore.setState((s) => ({ ...s, chatId: chatId,chatModelId:chatSession.chatModelId,chatProvider:chatSession.chatProvider }));
 	messageStore.setState((s) => ({ ...s, messages: chatSession.messages }));
 };
 export const deleteChatSession = async (

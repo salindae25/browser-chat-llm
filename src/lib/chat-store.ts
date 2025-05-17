@@ -1,18 +1,21 @@
 import { Store } from "@tanstack/react-store";
 import type { CoreMessage, LanguageModelV1 } from "ai";
+import type { LLMModel } from "./models";
 
 const activeChatStore = new Store<{
 	activeMessage: string;
 	userMessage: string;
 	generating: boolean;
-	llm:LanguageModelV1|null,
+	chatModelId:string|undefined,
+	chatProvider:string|undefined,
 	chatId: string,
 }>({
 	chatId: "",
 	activeMessage: "",
 	userMessage: "",
 	generating: false,
-	llm: null,
+	chatModelId: undefined,
+	chatProvider: undefined,
 });
 
 const messageStore = new Store<{ messages: CoreMessage[] }>({
@@ -22,4 +25,7 @@ const messageStore = new Store<{ messages: CoreMessage[] }>({
 const sideBarStore = new Store<{ open: boolean }>({
 	open: false,
 });
-export { activeChatStore, messageStore, sideBarStore };
+const modelStore = new Store<{models: LLMModel[]}>({
+models:	[]
+})
+export { activeChatStore, messageStore, sideBarStore,modelStore };

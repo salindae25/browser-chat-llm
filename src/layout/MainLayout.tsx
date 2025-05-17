@@ -2,6 +2,7 @@ import { AppSidebar } from "@/components/Sidebar"
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { SIDEBAR_COOKIE_NAME } from "@/components/ui/sidebar"
 import type { ReactNode } from "react"
+import { Toaster } from "sonner"
 const sidebarState = localStorage.getItem(SIDEBAR_COOKIE_NAME)
 const MainLayout = ({children}: {children: ReactNode}) => {
    
@@ -15,6 +16,7 @@ const MainLayout = ({children}: {children: ReactNode}) => {
             </div>
           </header>
          {children}
+         <Toaster />
         </SidebarInset>
       </SidebarProvider>
     )
