@@ -30,6 +30,14 @@ export interface LLMProviderConfig {
   enabled: boolean;
 }
 
+export interface GeneralAppSettings {
+  id: string; // Unique identifier, e.g., 'global'
+  titleLlmProviderId?: string; // ID of the LLMProviderConfig for titles
+  titleLlmModelId?: string;    // Specific model ID for title generation,
+  chatLlmProviderId?: string;
+  chatLlmModelId?: string;
+}
+
 export interface User extends Profile {
   id: string;
   username: string;

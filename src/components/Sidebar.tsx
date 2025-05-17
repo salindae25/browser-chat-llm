@@ -3,6 +3,7 @@ import {
 	Bell,
 	Brain,
 	ChevronsUpDown,
+	CogIcon,
 	CreditCard,
 	LogOut,
 	Plus,
@@ -10,7 +11,7 @@ import {
 	Sparkles,
 	Trash,
 } from "lucide-react";
-import { useState } from "react";
+import { use, useEffect, useState } from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -23,6 +24,7 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+	SIDEBAR_COOKIE_NAME,
 	Sidebar,
 	SidebarContent,
 	SidebarFooter,
@@ -35,7 +37,7 @@ import {
 	SidebarRail,
 	useSidebar,
 } from "@/components/ui/sidebar";
-import { activeChatStore } from "@/lib/chat-store";
+import { activeChatStore, sideBarStore } from "@/lib/chat-store";
 import { db } from "@/lib/db";
 import {
 	createNewChatSession,
@@ -44,8 +46,9 @@ import {
 } from "@/lib/services";
 import { cn } from "@/lib/utils";
 import logo from "@/logo.svg";
-import { Link } from "@tanstack/react-router";
+import { Link, useLocation } from "@tanstack/react-router";
 import { useNavigate } from "@tanstack/react-router";
+import { useStore } from "@tanstack/react-store";
 import { useLiveQuery } from "dexie-react-hooks";
 // This is sample data.
 
@@ -54,22 +57,19 @@ interface ChatSessionItemProps {
 		id: string;
 		title: string;
 	};
+	isSideBarOpen: boolean;
 }
 
-const ChatSessionItem = ({ chatSession }: ChatSessionItemProps) => {
+const ChatSessionItem = ({ chatSession ,isSideBarOpen}: ChatSessionItemProps) => {
 	const [isRegenerating, setIsRegenerating] = useState(false);
+	
 	const navigate = useNavigate();
-	const handleRegenerateTitle = async (e: React.MouseEvent) => {
+	const handleRegenerateTitle = async (e: React.MouseEvent, chatId: string) => {
 		e.stopPropagation();
 		e.preventDefault();
 		try {
 			setIsRegenerating(true);
-			// Set the active chat ID so titleGenerate knows which chat to update
-			activeChatStore.setState((prev) => ({
-				...prev,
-				chatId: chatSession.id,
-			}));
-			await titleGenerate();
+			await titleGenerate(chatId);
 		} catch (error) {
 			console.error("Failed to regenerate title:", error);
 		} finally {
@@ -78,14 +78,16 @@ const ChatSessionItem = ({ chatSession }: ChatSessionItemProps) => {
 	};
 
 	return (
-		<div className="flex items-center gap-2 w-full">
-			<span className="truncate flex-1 group-hover/link:max-w-[70%] group-focus-visible/link:max-w-[75%]">{chatSession.title}</span>
-			<div
+		<div className="flex items-center gap-2 w-full" title={chatSession.title}>
+			<span className="truncate flex-1 group-hover/link:max-w-[70%] group-focus-visible/link:max-w-[75%]">
+				{chatSession.title}
+			</span>
+			{isSideBarOpen && <div
 				className={cn(
 					"pointer-events-auto absolute right-0 bottom-0 top-0 z-50 flex gap-2 translate-x-full items-center justify-end text-muted-foreground transition-transform",
 					"group-hover/link:-translate-x-4 group-hover/link:bg-sidebar-accent",
 					"group-focus-visible/link:-translate-x-4 group-focus-visible/link:bg-sidebar-accent",
-					"group-focus/link:-translate-x-4 group-focus/link:bg-sidebar-accent",
+					"group-focus/link:-translate-x-4 group-focus/link:bg-sidebar-accent"
 				)}
 			>
 				<div
@@ -104,13 +106,13 @@ const ChatSessionItem = ({ chatSession }: ChatSessionItemProps) => {
 				<button
 					type="button"
 					className={`bg-amber-50 p-1 rounded cursor-pointer ${isRegenerating ? "animate-spin" : ""}`}
-					onClick={handleRegenerateTitle}
+					onClick={(e) => handleRegenerateTitle(e, chatSession.id)}
 					disabled={isRegenerating}
 					title="Regenerate title"
 				>
 					<RefreshCw className="h-3.5 w-3.5" />
 				</button>
-			</div>
+			</div>}
 		</div>
 	);
 };
@@ -123,8 +125,14 @@ const data = {
 };
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 	const { isMobile } = useSidebar();
-
-	const chatSessions = useLiveQuery(() => db.chatSessions.limit(10).toArray());
+	const navigate = useNavigate();
+	const location = useLocation()
+	const sideBarOpen = useStore(sideBarStore, (s) => s.open);
+	const chatSessions = useLiveQuery(() => db.chatSessions.orderBy('createdAt').reverse().limit(10).toArray());
+	useEffect(()=>{
+		const sidebarState = localStorage.getItem(SIDEBAR_COOKIE_NAME)
+		sideBarStore.setState((s)=>({open: sidebarState === "open"}))
+	},[])
 	const onNewChat = async () => {
 		await createNewChatSession();
 		navigate({
@@ -168,14 +176,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 							to="/chat/$chatId"
 							params={{ chatId: chatSession.id }}
 							key={chatSession.id}
-							className="group/link relative flex h-9 w-full 
+							className="group/link relative flex h-9 w-full cursor-pointer
 							items-center overflow-hidden rounded-lg px-2 py-1 text-sm outline-none 
 							hover:bg-sidebar-accent hover:text-sidebar-accent-foreground 
 							focus-visible:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-sidebar-ring 
 							hover:focus-visible:bg-sidebar-accent bg-sidebar-accent text-sidebar-accent-foreground"
 						>
-							<SidebarMenuButton className="flex items-center justify-between">
-								<ChatSessionItem chatSession={chatSession} />
+							<SidebarMenuButton className={cn("flex items-center justify-between",{'bg-main/20': !sideBarOpen}, { "bg-main/70": location.pathname === `/chat/${chatSession.id}` })} tooltip={chatSession.title}>
+								<ChatSessionItem chatSession={chatSession} isSideBarOpen={sideBarOpen} />
 							</SidebarMenuButton>
 						</Link>
 					))}
@@ -183,10 +191,22 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 				<SidebarGroup className="mt-auto">
 					<SidebarGroupLabel>Settings</SidebarGroupLabel>
 					<Link to="/settings/llm-providers">
-						<SidebarMenuButton>
-							<Brain />
-							<span>LLM Provider</span>
-						</SidebarMenuButton>
+					<SidebarMenuButton
+						className={cn("cursor-pointer",{"bg-main/70": location.pathname === "/settings/llm-providers"})}
+						tooltip="LLM Providers"
+					>
+						<Sparkles className="size-4" />
+						LLM Providers
+					</SidebarMenuButton>
+					</Link>
+					<Link to="/settings/general">
+					<SidebarMenuButton
+						className={cn('cursor-pointer',{"bg-main/50": location.pathname === "/settings/general"})}
+						tooltip="General Settings"
+					>
+						<CogIcon className="size-4" />
+						General Settings
+					</SidebarMenuButton>
 					</Link>
 				</SidebarGroup>
 			</SidebarContent>
@@ -201,7 +221,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 								>
 									<Avatar className="h-8 w-8">
 										<AvatarImage
-											src="https://github.com/shadcn.png?size=40"
 											alt="CN"
 										/>
 										<AvatarFallback>CN</AvatarFallback>

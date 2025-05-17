@@ -124,153 +124,126 @@ const SettingsLLM = () => {
 	};
 
 	return (
-		<div className="min-h-screen flex bg-gray-50 font-sans">
-			{/* Sidebar */}
-			<aside className="hidden md:flex flex-col w-64 shrink-0 bg-white border-r shadow-sm transition duration-300">
-				<h2 className="font-bold text-xl py-6 px-6">LLM Configurator</h2>
-				<nav className="flex-grow space-y-4 px-6 py-2">
-					<a
-						href="#openai"
-						className="text-gray-700 hover:text-indigo-600 transition flex items-center gap-3 font-semibold"
-					>
-						🧠 OpenAI
-					</a>
-					<a
-						href="#groq"
-						className="text-gray-700 hover:text-indigo-600 transition flex items-center gap-3 font-semibold"
-					>
-						🔥 Groq
-					</a>
-					<a
-						href="#gemini"
-						className="text-gray-700 hover:text-indigo-600 transition flex items-center gap-3 font-semibold"
-					>
-						🌈 Gemini
-					</a>
-				</nav>
-			</aside>
-
-			{/* Content */}
+		<div className="max-h-[calc(100vh - 70px)] flex bg-gray-50 font-sans">
 			<main className="flex-grow p-8 max-w-full animate-fade-in">
 				{(!llmProviders || Object.keys(providerSettings).length === 0) && (
 					<p>Loading provider settings...</p>
 				)}
 				{llmProviders && Object.keys(providerSettings).length > 0 && (
-					<form onSubmit={handleSubmit}>
+					<form onSubmit={handleSubmit} className="flex flex-col w-full">
 						<h1 className="text-2xl md:text-3xl font-bold mb-4">
 							Configure LLM Providers
 						</h1>
-
-						{/* Dynamic Provider Sections */}
-						{llmProviders?.map((provider) => (
-							<div
-								key={provider.id}
-								id={provider.id}
-								className="mb-6 space-y-4 transition duration-500 rounded-lg shadow p-6 bg-white border"
-							>
-								<h2 className="font-semibold text-xl flex items-center gap-3 mb-4">
-									{provider.name}
-								</h2>
-								<label className="flex items-center gap-3 mt-4">
-									<input
-										type="checkbox"
-										checked={providerSettings[provider.id]?.enabled ?? false}
-										onChange={(e) =>
-											handleInputChange(
-												provider.id,
-												"enabled",
-												e.target.checked,
-											)
-										}
-									/>
-									Enable {provider.name}
-								</label>
-								{(provider.providerKey === "openai" ||
-									provider.providerKey === "gemini" ||
-									provider.providerKey === "groq") && (
-									<label className="flex flex-col sm:flex-row justify-between w-full">
-										<div>
-											<span className="text-gray-700 font-medium">API Key</span>
-											<input
-												type="password"
-												value={providerSettings[provider.id]?.apiKey ?? ""}
-												onChange={(e) =>
-													handleInputChange(
-														provider.id,
-														"apiKey",
-														e.target.value,
-													)
-												}
-												placeholder="Enter your API key..."
-												className="mt-1 border rounded-md px-3 py-2 w-full focus:outline-none focus:ring-2 ring-indigo-500"
-											/>
-										</div>
-									</label>
-								)}
-								{(provider.providerKey === "lmstudio" ||
-									provider.providerKey === "ollama" ||
-									provider.providerKey === "openai" ||
-									provider.providerKey === "gemini" ||
-									provider.providerKey === "groq") && (
-									<label className="flex flex-col sm:flex-row justify-between w-full">
-										<div>
-											<span className="text-gray-700 font-medium">
-												Base URL
-											</span>
-											<input
-												type="text"
-												value={providerSettings[provider.id]?.baseURL ?? ""}
-												onChange={(e) =>
-													handleInputChange(
-														provider.id,
-														"baseURL",
-														e.target.value,
-													)
-												}
-												placeholder="Enter Base URL (e.g., http://localhost:1234/v1)"
-												className="mt-1 border rounded-md px-3 py-2 w-full focus:outline-none focus:ring-2 ring-indigo-500"
-											/>
-										</div>
-									</label>
-								)}
-								{(provider.providerKey === "openai" ||
-									provider.providerKey === "gemini" ||
-									provider.providerKey === "lmstudio" ||
-									provider.providerKey === "ollama" ||
-									provider.providerKey === "groq") && (
-									<div className="flex flex-col sm:flex-row gap-4 mt-4">
-										<div>
-											<span className="text-gray-700 font-medium">
-												Default Model
-											</span>
-											<input
-												type="text"
-												value={
-													providerSettings[provider.id]?.defaultModel ?? ""
-												}
-												onChange={(e) =>
-													handleInputChange(
-														provider.id,
-														"defaultModel",
-														e.target.value,
-													)
-												}
-												placeholder="Enter default model ID"
-												className="mt-1 border rounded-md px-3 py-2 w-full focus:outline-none focus:ring-2 ring-indigo-500"
-											/>
-										</div>
-									</div>
-								)}
-							</div>
-						))}
-
-						{/* Removed static sections as they are now dynamically generated */}
 						<button
 							type="submit"
-							className="mt-6 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-md transition duration-200"
+							className="ml-auto my-6 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-md transition duration-200"
 						>
 							Save Settings
 						</button>
+						<div className="flex flex-row flex-2/4 gap-4 flex-wrap w-full">
+							{/* Dynamic Provider Sections */}
+							{llmProviders?.map((provider) => (
+								<div
+									key={provider.id}
+									id={provider.id}
+									className="mb-6 space-y-4 transition duration-500 rounded-lg shadow p-6 bg-white border w-[45%]"
+								>
+									<h2 className="font-semibold text-xl flex items-center gap-3 mb-4">
+										{provider.name}
+									</h2>
+									<label className="flex items-center gap-3 mt-4">
+										<input
+											type="checkbox"
+											checked={providerSettings[provider.id]?.enabled ?? false}
+											onChange={(e) =>
+												handleInputChange(
+													provider.id,
+													"enabled",
+													e.target.checked,
+												)
+											}
+										/>
+										Enable {provider.name}
+									</label>
+									{(provider.providerKey === "openai" ||
+										provider.providerKey === "gemini" ||
+										provider.providerKey === "groq") && (
+										<label className="flex flex-col sm:flex-row justify-between w-full">
+											<div>
+												<span className="text-gray-700 font-medium">
+													API Key
+												</span>
+												<input
+													type="password"
+													value={providerSettings[provider.id]?.apiKey ?? ""}
+													onChange={(e) =>
+														handleInputChange(
+															provider.id,
+															"apiKey",
+															e.target.value,
+														)
+													}
+													placeholder="Enter your API key..."
+													className="mt-1 border rounded-md px-3 py-2 w-full focus:outline-none focus:ring-2 ring-indigo-500"
+												/>
+											</div>
+										</label>
+									)}
+									{(provider.providerKey === "lmstudio" ||
+										provider.providerKey === "ollama") && (
+										<label className="flex flex-col sm:flex-row justify-between w-full">
+											<div>
+												<span className="text-gray-700 font-medium">
+													Base URL
+												</span>
+												<input
+													type="text"
+													value={providerSettings[provider.id]?.baseURL ?? ""}
+													onChange={(e) =>
+														handleInputChange(
+															provider.id,
+															"baseURL",
+															e.target.value,
+														)
+													}
+													placeholder="Enter Base URL (e.g., http://localhost:1234/v1)"
+													className="mt-1 border rounded-md px-3 py-2 w-full focus:outline-none focus:ring-2 ring-indigo-500"
+												/>
+											</div>
+										</label>
+									)}
+									{(provider.providerKey === "openai" ||
+										provider.providerKey === "gemini" ||
+										provider.providerKey === "lmstudio" ||
+										provider.providerKey === "ollama" ||
+										provider.providerKey === "groq") && (
+										<div className="flex flex-col sm:flex-row gap-4 mt-4">
+											<div>
+												<span className="text-gray-700 font-medium">
+													Default Model
+												</span>
+												<input
+													type="text"
+													value={
+														providerSettings[provider.id]?.defaultModel ?? ""
+													}
+													onChange={(e) =>
+														handleInputChange(
+															provider.id,
+															"defaultModel",
+															e.target.value,
+														)
+													}
+													placeholder="Enter default model ID"
+													className="mt-1 border rounded-md px-3 py-2 w-full focus:outline-none focus:ring-2 ring-indigo-500"
+												/>
+											</div>
+										</div>
+									)}
+								</div>
+							))}
+						</div>
+						{/* Removed static sections as they are now dynamically generated */}
 					</form>
 				)}
 			</main>

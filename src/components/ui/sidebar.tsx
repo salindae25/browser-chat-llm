@@ -22,6 +22,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
+import { sideBarStore } from "@/lib/chat-store";
 import { cn } from "@/lib/utils";
 import { Link } from "@tanstack/react-router";
 
@@ -81,7 +82,7 @@ function SidebarProvider({
       } else {
         _setOpen(openState);
       }
-
+      sideBarStore.setState((s)=>({open: openState}))
       localStorage.setItem(SIDEBAR_COOKIE_NAME, openState ? "open" : "closed");
     },
     [setOpenProp, open],

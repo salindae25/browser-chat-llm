@@ -8,7 +8,8 @@ import {
 import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
 import * as TanStackQueryProvider from "./integrations/tanstack-query/root-provider.tsx";
-import SettingsLLm from './routes/settings.llm'
+import SettingsLLm from './routes/settings.llm';
+import  SettingsGeneralRoute  from './routes/settings.general';
 
 import "./styles.css";
 import reportWebVitals from "./reportWebVitals.ts";
@@ -36,7 +37,7 @@ const routeTree = rootRoute.addChildren([
   indexRoute,
   ChatSection(rootRoute),
   SettingsLLm(rootRoute),
-
+  SettingsGeneralRoute(rootRoute), // Add the new general settings route
 ]);
 
 const router = createRouter({
