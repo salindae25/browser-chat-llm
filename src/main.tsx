@@ -10,7 +10,7 @@ import ReactDOM from "react-dom/client";
 import * as TanStackQueryProvider from "./integrations/tanstack-query/root-provider.tsx";
 import SettingsGeneralRoute from "./routes/settings.general";
 import SettingsLLm from "./routes/settings.llm";
-
+import { Analytics } from '@vercel/analytics/react';
 import "./styles.css";
 import reportWebVitals from "./reportWebVitals.ts";
 
@@ -22,6 +22,7 @@ const rootRoute = createRootRoute({
 	component: () => (
 		<MainLayout>
 			<Outlet />
+			<Analytics />
 		</MainLayout>
 	),
 });
