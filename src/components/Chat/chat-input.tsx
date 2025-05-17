@@ -8,7 +8,7 @@ import { Textarea } from "../ui/textarea";
 
 export const ChatInput = memo(() => {
 	const chatRef = useRef<HTMLTextAreaElement>(null);
-  const generating = useStore(activeChatStore, (s) => s.generating);
+	const generating = useStore(activeChatStore, (s) => s.generating);
 	const onSend = async () => {
 		activeChatStore.setState((s) => ({
 			...s,
@@ -23,12 +23,20 @@ export const ChatInput = memo(() => {
 		event,
 	) => {
 		if (event.key === "Enter") {
-			event.preventDefault();
+			
+			if (
+				!activeChatStore.state.generating &&
+				activeChatStore.state.userMessage.trim().length !== 0 &&
+				!event.shiftKey
+			) {
+				event.preventDefault();
 			event.stopPropagation();
-			if (!activeChatStore.state.generating) {
 				await onSend();
 			} else {
-				return;
+				if(!event.shiftKey){
+					event.preventDefault();
+					event.stopPropagation();
+				}
 			}
 		}
 	};
@@ -44,10 +52,11 @@ export const ChatInput = memo(() => {
 				}}
 				onKeyDown={onEnterPress}
 				className="border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive flex field-sizing-content rounded-md border px-3 py-2 text-base transition-[color,box-shadow] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm dark:bg-background min-h-[44px] w-full resize-none border-none bg-transparent shadow-none outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+				style={{ maxHeight: "250px" }}
 			/>
 			<div className="flex w-full">
 				<Button
-          disabled={generating}
+					disabled={generating}
 					onClick={onSend}
 					variant="noShadow"
 					className="ml-auto"

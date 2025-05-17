@@ -11,11 +11,11 @@ import { gruvboxLight } from "react-syntax-highlighter/dist/esm/styles/prism";
 import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
 
-export default function MarkdownRenderer({ children }: { children: string }) {
+export default function MarkdownRenderer({ children, includeRaw }: { children: string, includeRaw?: boolean }) {
 	return (
 		<Markdown
 			remarkPlugins={[remarkGfm]}
-			rehypePlugins={[rehypeRaw]}
+			rehypePlugins={includeRaw ? [rehypeRaw] : []}
 			components={{
 				h1: (props: HTMLAttributes<HTMLHeadingElement>) => (
 					<h1 className="text-2xl font-bold my-2" {...props} />
@@ -64,7 +64,7 @@ export default function MarkdownRenderer({ children }: { children: string }) {
 							</SyntaxHighlighter>
 						</CustomCodeContainer>
 					) : (
-						<code className={cn(className, "bg-gray-100")} {...props}>
+						<code className={cn("bg-gray-100", className)} {...props}>
 							{codeChildren}
 						</code>
 					);
@@ -73,7 +73,7 @@ export default function MarkdownRenderer({ children }: { children: string }) {
 					const { children, ...rest } = props;
 					return (
 						<p
-							style={{ marginBottom: "0.5rem", whiteSpace: "pre-line" }}
+							className="text-base font-medium my-1"
 							{...rest}
 						>
 							{children}
@@ -109,7 +109,7 @@ const CustomCodeContainer = ({
 					{copied ? "Copied" : "Copy"}
 				</button>
 			</div>
-			<div className="bg-gray-100 ">{children}</div>
+			<div className="bg-gray-100">{children}</div>
 		</div>
 	);
 };

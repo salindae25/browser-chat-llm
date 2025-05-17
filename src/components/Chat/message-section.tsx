@@ -39,7 +39,7 @@ const MessageItem = ({ data }: { data: CoreMessage }) => {
 					})}
 				>
 					{typeof data.content === "string" && (
-						<MarkdownRenderer>
+						<MarkdownRenderer includeRaw={!isUserMessage}>
 							{data.content.replace(/(\[.*?\])/g, "$1\n")}
 						</MarkdownRenderer>
 					)}

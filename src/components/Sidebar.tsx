@@ -4,7 +4,6 @@ import {
 	Brain,
 	ChevronsUpDown,
 	CreditCard,
-	Cross,
 	LogOut,
 	Plus,
 	Sparkles,
@@ -22,7 +21,6 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-	SideBarLink,
 	Sidebar,
 	SidebarContent,
 	SidebarFooter,
@@ -32,23 +30,20 @@ import {
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
-	SidebarMenuSub,
 	SidebarRail,
 	useSidebar,
 } from "@/components/ui/sidebar";
-import { activeChatStore, messageStore } from "@/lib/chat-store";
+import { activeChatStore,  } from "@/lib/chat-store";
 import { db } from "@/lib/db";
 import {
 	createNewChatSession,
 	deleteChatSession,
-	updateChatSessionMessages,
 } from "@/lib/services";
+import { cn } from "@/lib/utils";
 import logo from "@/logo.svg";
 import { Link } from "@tanstack/react-router";
 import { useNavigate } from "@tanstack/react-router";
 import { useLiveQuery } from "dexie-react-hooks";
-import { useRef } from "react";
-import { Button } from "./ui/button";
 // This is sample data.
 
 const data = {
@@ -63,7 +58,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 	const chatSessions = useLiveQuery(() => db.chatSessions.limit(10).toArray());
 	const onNewChat = async () => {
 		await createNewChatSession();
-		navigate({to: "/chat/$chatId", params: { chatId: activeChatStore.state.chatId }});
+		navigate({
+			to: "/chat/$chatId",
+			params: { chatId: activeChatStore.state.chatId },
+		});
 	};
 	return (
 		<Sidebar collapsible="icon" {...props}>
@@ -101,23 +99,35 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 							to="/chat/$chatId"
 							params={{ chatId: chatSession.id }}
 							key={chatSession.id}
-							className="group/link relative flex h-9 w-full items-center overflow-hidden rounded-lg px-2 py-1 text-sm outline-none hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-sidebar-ring hover:focus-visible:bg-sidebar-accent bg-sidebar-accent text-sidebar-accent-foreground"
+							className="group/link relative flex h-9 w-full 
+							items-center overflow-hidden rounded-lg px-2 py-1 text-sm outline-none 
+							hover:bg-sidebar-accent hover:text-sidebar-accent-foreground 
+							focus-visible:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-sidebar-ring 
+							hover:focus-visible:bg-sidebar-accent bg-sidebar-accent text-sidebar-accent-foreground"
 						>
 							<SidebarMenuButton className="flex items-center justify-between">
 								<span>{chatSession.title}</span>
-								<div className="pointer-events-auto absolute right-0 bottom-0 top-0 z-50 flex translate-x-full items-center justify-end text-muted-foreground transition-transform group-hover/link:-translate-x-4 group-hover/link:bg-sidebar-accent"	>
-									<Button
-										variant="noShadowNeutral"
-										size="icon"
+								<div
+									className={cn(
+										"pointer-events-auto absolute right-0 bottom-0 top-0 z-50 flex translate-x-full items-center justify-end text-muted-foreground transition-transform",
+										"group-hover/link:-translate-x-4 group-hover/link:bg-sidebar-accent",
+										"group-focus-visible/link:-translate-x-4 group-focus-visible/link:bg-sidebar-accent",
+										"group-focus/link:-translate-x-4 group-focus/link:bg-sidebar-accent",
+									)}
+								>
+									<div
+										onKeyDown={(e) => {
+											e.stopPropagation();
+											deleteChatSession(chatSession.id, navigate as any);
+										}}
 										onClick={(e) => {
 											e.stopPropagation();
-											
-											deleteChatSession(chatSession.id,navigate as any);
+											deleteChatSession(chatSession.id, navigate as any);
 										}}
-										className="size-4 p-2"
+										className="bg-amber-50 p-1 rounded cursor-pointer"
 									>
-										<Trash />
-									</Button>
+										<Trash className="size-4" />
+									</div>
 								</div>
 							</SidebarMenuButton>
 						</Link>
