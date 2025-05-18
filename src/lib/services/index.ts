@@ -126,6 +126,7 @@ export const createNewChatSession = async () => {
 		chatProvider: chatProvider,
 	}));
 	messageStore.setState((s) => ({ ...s, messages: [] }));
+	return newChatId;
 };
 export const loadChatSession = async (chatId: string) => {
 	const chatSession = await db.chatSessions.get(chatId);
