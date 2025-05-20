@@ -34,6 +34,7 @@
     "@tanstack/react-router-devtools": "^1.114.3",
     "@tanstack/react-store": "^0.7.0",
     "@tanstack/store": "^0.7.0",
+    "@vercel/analytics": "^1.5.0",
     "ai": "^4.3.15",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
