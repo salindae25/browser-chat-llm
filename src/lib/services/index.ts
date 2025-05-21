@@ -11,45 +11,46 @@ import { activeChatStore, messageStore } from "../chat-store";
 import { db } from "../db";
 import { getChatLlm, getTitleLlm } from "./providers"; // Import the async functions
 export const fetchChat = async () => {
-	messageStore.setState((s) => {
-		const newMessage: CoreUserMessage = {
-			role: "user",
-			content: activeChatStore.state.userMessage,
-		};
-		const messages = [...s.messages];
-		messages.push(newMessage);
-		return { ...s, messages, generating: true };
-	});
-	activeChatStore.setState((s) => ({ ...s, generating: true }));
-	if (messageStore.state.messages.length === 1) {
+	activeChatStore.setState((s) => ({
+		...s,
+		generating: true,
+		activeMessage: "",
+	}));
+	const newUserMessage: CoreUserMessage = {
+		role: "user",
+		content: activeChatStore.state.userMessage,
+	};
+	const oldMessages = await db.chatSessions.get(activeChatStore.state.chatId);
+	oldMessages?.messages.push(newUserMessage);
+	await updateChatSessionMessages(
+		activeChatStore.state.chatId,
+		oldMessages?.messages ?? [],
+	);
+	if (oldMessages?.messages.length === 1) {
 		titleGenerate();
 	}
 
 	const currentLlm = await getChatLlm();
 	if (!currentLlm) {
-		console.error("Chat LLM not available.");
 		activeChatStore.setState((s) => ({
 			...s,
 			generating: false,
 			activeMessage: "Error: Chat LLM not configured or available.",
 		}));
-		// Optionally, update messageStore to reflect the error to the user
-		messageStore.setState((s) => {
-			const errorMessage: CoreAssistantMessage = {
+		await updateChatSessionMessages(activeChatStore.state.chatId, [
+			...(oldMessages?.messages ?? []),
+			{
 				role: "assistant",
-				content:
-					"Error: Chat LLM is not configured or available. Please check settings.",
-			};
-			const messages = [...s.messages, errorMessage];
-			return { ...s, messages, generating: false };
-		});
+				content: "Error: Chat LLM not configured or available.",
+			},
+		]);
 		return;
 	}
 
 	const { textStream } = streamText({
 		model: currentLlm,
 		system: "You are a helpful assistant.",
-		messages: messageStore.state.messages,
+		messages: oldMessages?.messages ?? [],
 	});
 	for await (const text of textStream) {
 		activeChatStore.setState((s) => ({
@@ -57,18 +58,22 @@ export const fetchChat = async () => {
 			activeMessage: s.activeMessage + text,
 		}));
 	}
-	messageStore.setState((s) => {
-		const newMessage: CoreAssistantMessage = {
-			role: "assistant",
-			content: activeChatStore.state.activeMessage,
-		};
-		const messages = [...s.messages];
-		messages.push(newMessage);
-		return { ...s, messages };
-	});
+	const newAssistantMessage: CoreAssistantMessage = {
+		role: "assistant",
+		content: activeChatStore.state.activeMessage,
+	};
 
-	activeChatStore.setState((s) => ({ ...s, generating: false }));
+	await updateChatSessionMessages(activeChatStore.state.chatId, [
+		...(oldMessages?.messages ?? []),
+		newAssistantMessage,
+	]);
+	activeChatStore.setState((s) => ({
+		...s,
+		generating: false,
+		activeMessage: "",
+	}));
 };
+
 export const titleGenerate = async (chatId?: string) => {
 	const currentTitleLlm = await getTitleLlm();
 	if (!currentTitleLlm) {
@@ -101,6 +106,7 @@ export const titleGenerate = async (chatId?: string) => {
 		title: output.title,
 	});
 };
+
 export const createNewChatSession = async () => {
 	const generalSettings = await db.generalSettings.get("global");
 	const chatModelId =
@@ -128,6 +134,7 @@ export const createNewChatSession = async () => {
 	messageStore.setState((s) => ({ ...s, messages: [] }));
 	return newChatId;
 };
+
 export const loadChatSession = async (chatId: string) => {
 	const chatSession = await db.chatSessions.get(chatId);
 	if (!chatSession) {
@@ -139,8 +146,8 @@ export const loadChatSession = async (chatId: string) => {
 		chatModelId: chatSession.chatModelId,
 		chatProvider: chatSession.chatProvider,
 	}));
-	messageStore.setState((s) => ({ ...s, messages: chatSession.messages }));
 };
+
 export const deleteChatSession = async (
 	chatId: string,
 	navigate: UseNavigateResult<string>,
@@ -152,9 +159,49 @@ export const deleteChatSession = async (
 		navigate({ to: "/" });
 	}
 };
+
 export const updateChatSessionMessages = async (
 	chatId: string,
 	messages: CoreMessage[],
 ) => {
 	await db.chatSessions.update(chatId, { messages, updatedAt: new Date() });
+};
+
+export const regenerateFromMessageIndex = async (
+	messageIndex: number,
+	chatId: string,
+) => {
+	const chatSession = await db.chatSessions.get(chatId);
+	if (!chatSession) {
+		return;
+	}
+	const messages = chatSession.messages;
+	const oldMessages = messages.slice(0, messageIndex + 1);
+	activeChatStore.setState((s) => ({ ...s, generating: true }));
+	await updateChatSessionMessages(chatId, oldMessages);
+	const currentLlm = await getChatLlm();
+	if (!currentLlm) {
+		return;
+	}
+	const { textStream } = streamText({
+		model: currentLlm,
+		system: "You are a helpful assistant.",
+		messages: oldMessages,
+	});
+	for await (const text of textStream) {
+		activeChatStore.setState((s) => ({
+			...s,
+			activeMessage: s.activeMessage + text,
+		}));
+	}
+	const newAssistantMessage: CoreAssistantMessage = {
+		role: "assistant",
+		content: activeChatStore.state.activeMessage,
+	};
+
+	await updateChatSessionMessages(chatId, [
+		...oldMessages,
+		newAssistantMessage,
+	]);
+	activeChatStore.setState((s) => ({ ...s, generating: false }));
 };

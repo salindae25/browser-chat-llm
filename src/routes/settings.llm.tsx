@@ -1,3 +1,15 @@
+import { Button } from "@/components/ui/button";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardFooter,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { db } from "@/lib/db";
 import type { LLMProviderConfig } from "@/lib/models";
 // Import Tailwind v4 via browser plugin (for example, CDN link)
@@ -124,129 +136,119 @@ const SettingsLLM = () => {
 	};
 
 	return (
-		<div className="max-h-[calc(100vh - 70px)] flex bg-gray-50 font-sans">
-			<main className="flex-grow p-8 max-w-full animate-fade-in">
-				{(!llmProviders || Object.keys(providerSettings).length === 0) && (
-					<p>Loading provider settings...</p>
-				)}
-				{llmProviders && Object.keys(providerSettings).length > 0 && (
-					<form onSubmit={handleSubmit} className="flex flex-col w-full">
-						<h1 className="text-2xl md:text-3xl font-bold mb-4">
-							Configure LLM Providers
-						</h1>
-						<button
-							type="submit"
-							className="ml-auto my-6 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-md transition duration-200"
-						>
-							Save Settings
-						</button>
-						<div className="flex flex-row flex-2/4 gap-4 flex-wrap w-full">
-							{/* Dynamic Provider Sections */}
-							{llmProviders?.map((provider) => (
-								<div
-									key={provider.id}
-									id={provider.id}
-									className="mb-6 space-y-4 transition duration-500 rounded-lg shadow p-6 bg-white border w-[45%]"
-								>
-									<h2 className="font-semibold text-xl flex items-center gap-3 mb-4">
+		<div className="flex w-full justify-center">
+			<div className="p-6 space-y-4 w-full max-w-6xl">
+				<div className="flex justify-between items-center">
+					<h1 className="text-3xl font-bold tracking-tight">
+						LLM Provider Settings
+					</h1>
+				</div>
+				<form onSubmit={handleSubmit} className="space-y-4">
+					{(!llmProviders || Object.keys(providerSettings).length === 0) && (
+						<p>Loading provider settings...</p>
+					)}
+					{llmProviders && Object.keys(providerSettings).length > 0 && (
+						<Tabs defaultValue={llmProviders[0].id} className="w-full">
+							<TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+								{llmProviders.map((provider) => (
+									<TabsTrigger
+										key={provider.id}
+										value={provider.id}
+										className="w-full justify-center"
+									>
 										{provider.name}
-									</h2>
-									<label className="flex items-center gap-3 mt-4">
-										<input
-											type="checkbox"
-											checked={providerSettings[provider.id]?.enabled ?? false}
-											onChange={(e) =>
-												handleInputChange(
-													provider.id,
-													"enabled",
-													e.target.checked,
-												)
-											}
-										/>
-										Enable {provider.name}
-									</label>
-									{(provider.providerKey === "openai" ||
-										provider.providerKey === "gemini" ||
-										provider.providerKey === "groq") && (
-										<label className="flex flex-col sm:flex-row justify-between w-full">
-											<div>
-												<span className="text-gray-700 font-medium">
-													API Key
-												</span>
-												<input
-													type="password"
-													value={providerSettings[provider.id]?.apiKey ?? ""}
-													onChange={(e) =>
-														handleInputChange(
-															provider.id,
-															"apiKey",
-															e.target.value,
-														)
-													}
-													placeholder="Enter your API key..."
-													className="mt-1 border rounded-md px-3 py-2 w-full focus:outline-none focus:ring-2 ring-indigo-500"
-												/>
+									</TabsTrigger>
+								))}
+							</TabsList>
+							{/* Provider Settings Cards */}
+							{llmProviders.map((provider) => (
+								<TabsContent
+									key={provider.id}
+									value={provider.id}
+									className="space-y-4"
+								>
+									<Card>
+										<CardHeader>
+											<CardTitle>{provider.name}</CardTitle>
+											<CardDescription>
+												Configure {provider.name} settings
+											</CardDescription>
+										</CardHeader>
+										<CardContent className="space-y-4">
+											{/* Keep your existing form fields here */}
+											<div className="space-y-2">
+												<label className="flex items-center gap-3">
+													<input
+														type="checkbox"
+														checked={
+															providerSettings[provider.id]?.enabled ?? false
+														}
+														onChange={(e) =>
+															handleInputChange(
+																provider.id,
+																"enabled",
+																e.target.checked,
+															)
+														}
+														className="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+													/>
+													<span>Enable {provider.name}</span>
+												</label>
 											</div>
-										</label>
-									)}
-									{(provider.providerKey === "lmstudio" ||
-										provider.providerKey === "ollama") && (
-										<label className="flex flex-col sm:flex-row justify-between w-full">
-											<div>
-												<span className="text-gray-700 font-medium">
-													Base URL
-												</span>
-												<input
-													type="text"
-													value={providerSettings[provider.id]?.baseURL ?? ""}
-													onChange={(e) =>
-														handleInputChange(
-															provider.id,
-															"baseURL",
-															e.target.value,
-														)
-													}
-													placeholder="Enter Base URL (e.g., http://localhost:1234/v1)"
-													className="mt-1 border rounded-md px-3 py-2 w-full focus:outline-none focus:ring-2 ring-indigo-500"
-												/>
-											</div>
-										</label>
-									)}
-									{(provider.providerKey === "openai" ||
-										provider.providerKey === "gemini" ||
-										provider.providerKey === "lmstudio" ||
-										provider.providerKey === "ollama" ||
-										provider.providerKey === "groq") && (
-										<div className="flex flex-col sm:flex-row gap-4 mt-4">
-											<div>
-												<span className="text-gray-700 font-medium">
-													Default Model
-												</span>
-												<input
-													type="text"
-													value={
-														providerSettings[provider.id]?.defaultModel ?? ""
-													}
-													onChange={(e) =>
-														handleInputChange(
-															provider.id,
-															"defaultModel",
-															e.target.value,
-														)
-													}
-													placeholder="Enter default model ID"
-													className="mt-1 border rounded-md px-3 py-2 w-full focus:outline-none focus:ring-2 ring-indigo-500"
-												/>
-											</div>
-										</div>
-									)}
-								</div>
+
+											{(provider.providerKey === "openai" ||
+												provider.providerKey === "gemini" ||
+												provider.providerKey === "groq") && (
+												<div className="space-y-2">
+													<Label>API Key</Label>
+													<Input
+														type="password"
+														value={providerSettings[provider.id]?.apiKey ?? ""}
+														onChange={(e) =>
+															handleInputChange(
+																provider.id,
+																"apiKey",
+																e.target.value,
+															)
+														}
+														placeholder="Enter your API key..."
+														className="w-full"
+													/>
+												</div>
+											)}
+
+											{(provider.providerKey === "lmstudio" ||
+												provider.providerKey === "ollama") && (
+												<div className="space-y-2">
+													<Label>Base URL</Label>
+													<Input
+														type="text"
+														value={providerSettings[provider.id]?.baseURL ?? ""}
+														onChange={(e) =>
+															handleInputChange(
+																provider.id,
+																"baseURL",
+																e.target.value,
+															)
+														}
+														placeholder="Enter Base URL (e.g., http://localhost:1234/v1)"
+														className="w-full"
+													/>
+												</div>
+											)}
+										</CardContent>
+										<CardFooter>
+											<Button type="submit" className="w-full sm:w-auto">
+												Save Settings
+											</Button>
+										</CardFooter>
+									</Card>
+								</TabsContent>
 							))}
-						</div>
-						{/* Removed static sections as they are now dynamically generated */}
-					</form>
-				)}
-			</main>
+						</Tabs>
+					)}
+				</form>
+			</div>
 		</div>
 	);
 };

@@ -3,9 +3,9 @@ import {
 	GeneratingMessage,
 	MessagesSection,
 } from "@/components/Chat/message-section";
-import { activeChatStore, messageStore } from "@/lib/chat-store";
-import { loadChatSession, updateChatSessionMessages } from "@/lib/services";
-import { type RootRoute, createRoute  } from "@tanstack/react-router";
+
+import { loadChatSession } from "@/lib/services";
+import { type RootRoute, createRoute } from "@tanstack/react-router";
 import { useParams } from "@tanstack/react-router";
 import { useEffect } from "react";
 
@@ -18,18 +18,7 @@ const ChatSection = () => {
 		if (chatId === "") {
 			return;
 		}
-		const unsub = messageStore.subscribe((s) => {
-			updateChatSessionMessages(
-				activeChatStore.state.chatId,
-				s.currentVal.messages,
-			);
-		});
 		loadChatSession(chatId);
-		return () => {
-			if (unsub) {
-				unsub();
-			}
-		};
 	}, [chatId]);
 	return (
 		<div className="flex flex-1 flex-col gap-4 p-4 pt-0">
