@@ -1,7 +1,34 @@
+import { useEffect } from "react";
 import { ChatInput } from "./components/Chat/chat-input";
 import ChatLayout from "./layout/ChatLayout";
-
+import { activeChatStore } from "./lib/chat-store";
+import { db } from "./lib/db";
+const getDefultSetting = async () => {
+	const settings = await db.generalSettings.get("global");
+	if (!settings) {
+		activeChatStore.setState((s) => ({
+			...s,
+			activeMessage: "",
+			userMessage: "",
+			generating: false,
+			abortController: null,
+			chatId: "",
+		}));
+		return;
+	}
+	if (settings.chatLlmModelId && settings.chatLlmProviderId) {
+		activeChatStore.setState((s) => ({
+			...s,
+			chatModelId: settings.chatLlmModelId,
+			chatProvider: settings.chatLlmProviderId,
+		}));
+	}
+	return settings;
+};
 function App() {
+	useEffect(() => {
+		getDefultSetting();
+	}, []);
 	return (
 		<ChatLayout>
 			<div className="flex flex-1 flex-col gap-4 p-4 pt-0">

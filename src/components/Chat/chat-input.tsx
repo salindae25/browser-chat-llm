@@ -34,8 +34,6 @@ export const ChatInput = memo(
 			if (chatRef.current && !isFromRoot) {
 				chatRef.current.value = "";
 			}
-
-			await fetchChat();
 			if (isFromRoot) {
 				navigate({
 					to: "/chat/$chatId",
@@ -43,17 +41,11 @@ export const ChatInput = memo(
 					replace: true,
 				});
 			}
+			await fetchChat();
 		};
 		const onEnterPress: React.KeyboardEventHandler<
 			HTMLTextAreaElement
 		> = async (event) => {
-			if (
-				isFromRoot &&
-				chatRef.current?.value.trim().length !== 0 &&
-				messageStore.state.messages.length === 0
-			) {
-				await createNewChatSession();
-			}
 			if (event.key === "Enter") {
 				if (
 					!activeChatStore.state.generating &&
@@ -81,6 +73,11 @@ export const ChatInput = memo(
 							...s,
 							userMessage: e.target.value,
 						}));
+					}}
+					onFocus={async () => {
+						if (isFromRoot) {
+							await createNewChatSession();
+						}
 					}}
 					onKeyDown={onEnterPress}
 					className="border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive flex field-sizing-content rounded-md border px-3 py-2 text-base transition-[color,box-shadow] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm dark:bg-background min-h-[44px] w-full resize-none border-none bg-transparent shadow-none outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
