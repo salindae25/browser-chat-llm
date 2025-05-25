@@ -4,36 +4,38 @@ A browser-based chat interface for interacting with multiple Large Language Mode
 
 ## Key Features
 
-*   **Browser-Based**: Runs entirely in your web browser, no installation needed beyond cloning and serving.
-*   **Multiple LLM Support**: Designed to interact with various Large Language Models.
-*   **Local Data Storage**: All conversation data is stored securely in your browser's IndexedDB, ensuring privacy.
-*   **Serverless Architecture**: Operates without a backend, enhancing data control and privacy.
-*   **Modern Tech Stack**: Built with React, TypeScript, and Vite for a fast and responsive experience.
+* **Browser-Based**: Runs entirely in your web browser, no installation needed beyond cloning and serving.
+* **Multiple LLM Support**: Supports various LLM providers including OpenAI, Google (Gemini), Groq, and OpenAI-compatible endpoints (like LM Studio and Ollama).
+* **Local Data Storage**: All conversation data is stored securely in your browser's IndexedDB, ensuring privacy.
+* **Serverless Architecture**: Operates without a backend, enhancing data control and privacy.
+* **Modern Tech Stack**: Built with React, TypeScript, and Vite for a fast and responsive experience.
+* **Customizable Settings**: Configure multiple LLM providers and models, with support for custom endpoints and API keys.
+* **Project Organization**: Organize your chats into projects and add tags for better management.
 
 ## Tech Stack
 
-*   **Frontend**: React, TypeScript
-*   **UI Components**: Likely [Shadcn/UI](https://ui.shadcn.com/) (inferred from `components.json`)
-*   **Build Tool**: Vite
-*   **Package Manager**: pnpm
-*   **Linting/Formatting**: Biome (configured in `biome.json`)
-*   **State Management**: Potentially Zustand or similar (inferred from `lib/chat-store.ts`)
-*   **Data Fetching/Caching**: Tanstack Query (inferred from `integrations/tanstack-query/`)
-*   **Styling**: Global CSS (`src/styles.css`) and component-specific styles.
+* **Frontend**: React, TypeScript
+* **UI Components**: Shadcn/UI
+* **Build Tool**: Vite
+* **Package Manager**: pnpm
+* **Linting/Formatting**: Biome
+* **State Management**: Zustand with IndexedDB persistence
+* **Data Fetching/Caching**: Tanstack Query
+* **Styling**: Global CSS and component-specific styles
 
 ## Getting Started
 
 ### Prerequisites
 
-*   Node.js (LTS version recommended)
-*   pnpm (Package manager)
+* Node.js (LTS version recommended)
+* pnpm (Package manager)
 
 ### Installation
 
-1.  **Clone the repository:**
-    ```bash
-    git clone <your-repository-url> llm-chat
-    cd llm-chat
+1. **Clone the repository:**
+   ```bash
+   git clone <your-repository-url> llm-chat
+   cd llm-chat
     ```
     (Replace `<your-repository-url>` with the actual URL of your GitHub repository if you've pushed it there.)
 

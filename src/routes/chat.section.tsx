@@ -3,6 +3,7 @@ import {
 	GeneratingMessage,
 	MessagesSection,
 } from "@/components/Chat/message-section";
+import ChatLayout from "@/layout/ChatLayout";
 
 import { loadChatSession } from "@/lib/services";
 import { type RootRoute, createRoute } from "@tanstack/react-router";
@@ -21,20 +22,22 @@ const ChatSection = () => {
 		loadChatSession(chatId);
 	}, [chatId]);
 	return (
-		<div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-			<div className="m-auto flex h-[calc(100vh-6rem)] w-full max-w-(--breakpoint-md) items-center justify-center">
-				<div className="flex h-full w-full flex-col items-center justify-center space-y-4">
-					<div
-						className="flex flex-col overflow-y-auto relative w-full flex-1 space-y-4 pe-2"
-						style={{ scrollbarWidth: "none" }}
-					>
-						<MessagesSection />
-						<GeneratingMessage />
+		<ChatLayout>
+			<div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+				<div className="m-auto flex h-[calc(100vh-6rem)] w-full max-w-(--breakpoint-md) items-center justify-center">
+					<div className="flex h-full w-full flex-col items-center justify-center space-y-4">
+						<div
+							className="flex flex-col overflow-y-auto relative w-full flex-1 space-y-4 pe-2"
+							style={{ scrollbarWidth: "none" }}
+						>
+							<MessagesSection />
+							<GeneratingMessage />
+						</div>
+						<ChatInput />
 					</div>
-					<ChatInput />
 				</div>
 			</div>
-		</div>
+		</ChatLayout>
 	);
 };
 

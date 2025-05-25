@@ -13,8 +13,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { db } from "@/lib/db";
 import type { LLMProviderConfig } from "@/lib/models";
 // Import Tailwind v4 via browser plugin (for example, CDN link)
-import { type RootRoute, createRoute } from "@tanstack/react-router";
+import { Link, type RootRoute, createRoute } from "@tanstack/react-router";
 import { useLiveQuery } from "dexie-react-hooks";
+import { ArrowLeftIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
 const SettingsLLM = () => {
@@ -137,13 +138,23 @@ const SettingsLLM = () => {
 
 	return (
 		<div className="flex w-full justify-center">
-			<div className="p-6 space-y-4 w-full max-w-6xl">
+			<div className="flex flex-col p-6 gap-8 w-full max-w-6xl">
+				<Link to="/">
+					<button
+						type="button"
+						className="flex items-center space-x-2 text-main-foreground hover:text-main-foreground-dark"
+					>
+						<ArrowLeftIcon className="h-6 w-6" />
+						<span>Back to Chat</span>
+					</button>
+				</Link>
+
 				<div className="flex justify-between items-center">
 					<h1 className="text-3xl font-bold tracking-tight">
 						LLM Provider Settings
 					</h1>
 				</div>
-				<form onSubmit={handleSubmit} className="space-y-4">
+				<form onSubmit={handleSubmit} className="w-full">
 					{(!llmProviders || Object.keys(providerSettings).length === 0) && (
 						<p>Loading provider settings...</p>
 					)}
