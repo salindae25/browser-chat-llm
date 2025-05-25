@@ -7,7 +7,7 @@ import {
 	streamText,
 } from "ai";
 import { z } from "zod";
-import { activeChatStore, messageStore } from "../chat-store";
+import { activeChatStore } from "../chat-store";
 import { db } from "../db";
 import { getChatLlm, getTitleLlm } from "./providers"; // Import the async functions
 export const fetchChat = async () => {
@@ -94,12 +94,10 @@ export const titleGenerate = async (chatId?: string) => {
 		});
 		return;
 	}
-	let messages = [];
+	let messages: CoreMessage[] = [];
 	if (chatId) {
 		const chatSession = await db.chatSessions.get(chatId);
 		messages = chatSession?.messages || [];
-	} else {
-		messages = messageStore.state.messages;
 	}
 	const { object: output } = await generateObject({
 		model: currentTitleLlm,
@@ -141,7 +139,6 @@ export const createNewChatSession = async () => {
 		chatModelId: chatModelId,
 		chatProvider: chatProvider,
 	}));
-	messageStore.setState((s) => ({ ...s, messages: [] }));
 	return newChatId;
 };
 
@@ -165,7 +162,6 @@ export const deleteChatSession = async (
 	await db.chatSessions.delete(chatId);
 	if (activeChatStore.state.chatId === chatId) {
 		activeChatStore.setState((s) => ({ ...s, chatId: "" }));
-		messageStore.setState((s) => ({ ...s, messages: [] }));
 		navigate({ to: "/" });
 	}
 };

@@ -1,5 +1,4 @@
 import { Store } from "@tanstack/react-store";
-import type { CoreMessage } from "ai";
 import type { LLMModel } from "./models";
 
 const activeChatStore = new Store<{
@@ -20,14 +19,10 @@ const activeChatStore = new Store<{
 	abortController: null,
 });
 
-const messageStore = new Store<{ messages: CoreMessage[] }>({
-	messages: [],
-});
-
 const sideBarStore = new Store<{ open: boolean }>({
 	open: false,
 });
 const modelStore = new Store<{ models: LLMModel[] }>({
 	models: [],
 });
-export { activeChatStore, messageStore, sideBarStore, modelStore };
+export { activeChatStore, sideBarStore, modelStore };

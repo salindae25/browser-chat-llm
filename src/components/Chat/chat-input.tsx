@@ -1,4 +1,4 @@
-import { activeChatStore, messageStore } from "@/lib/chat-store";
+import { activeChatStore } from "@/lib/chat-store";
 import { db } from "@/lib/db";
 import {
 	createNewChatSession,
@@ -41,6 +41,7 @@ export const ChatInput = memo(
 					replace: true,
 				});
 			}
+
 			await fetchChat();
 		};
 		const onEnterPress: React.KeyboardEventHandler<

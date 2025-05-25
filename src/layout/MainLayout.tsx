@@ -1,16 +1,8 @@
 import { OnboardingScreen } from "@/components/OnboardingScreen";
-import { AppSidebar } from "@/components/Sidebar";
-import {
-	SidebarInset,
-	SidebarProvider,
-	SidebarTrigger,
-} from "@/components/ui/sidebar";
-import { SIDEBAR_COOKIE_NAME } from "@/components/ui/sidebar";
 import { db } from "@/lib/db";
 import { useLocation } from "@tanstack/react-router";
 import { useLiveQuery } from "dexie-react-hooks";
 import type { ReactNode } from "react";
-import { Toaster } from "sonner";
 
 const MainLayout = ({ children }: { children: ReactNode }) => {
 	const llmProviders = useLiveQuery(() => db.llmProviders.toArray());
