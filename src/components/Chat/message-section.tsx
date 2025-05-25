@@ -146,6 +146,47 @@ const MessageItem = ({
 						</Button>
 					)}
 				</div>
+				<div
+					className={cn("relative flex gap-1 cursor-pointer", {
+						"-bottom-0 -left-1": isUserMessage,
+					})}
+				>
+					{isUserMessage && (
+						<>
+							<Button
+								aria-label="Delete message and following messages"
+								variant="noShadowNeutral"
+								className="size-8 border-none cursor-pointer"
+								size="icon"
+								onClick={() => deleteChatMessage(messageIndex)}
+							>
+								<Trash2Icon />
+							</Button>
+							<Button
+								aria-label="Regenerate message from this point"
+								variant="noShadowNeutral"
+								className="size-8 border-none cursor-pointer"
+								size="icon"
+								onClick={() =>
+									regenerateFromMessage(isUserMessage, messageIndex)
+								}
+							>
+								<RefreshCcwIcon />
+							</Button>
+						</>
+					)}
+					{!isUserMessage && (
+						<Button
+							aria-label="Copy message"
+							variant="noShadowNeutral"
+							className="size-8 border-none cursor-pointer"
+							size="icon"
+							onClick={() => copyToClipboard(data.content as string)}
+						>
+							<CopyIcon />
+						</Button>
+					)}
+				</div>
 			</div>
 		</div>
 	);

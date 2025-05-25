@@ -148,7 +148,6 @@ const SettingsLLM = () => {
 						<span>Back to Chat</span>
 					</button>
 				</Link>
-
 				<div className="flex justify-between items-center">
 					<h1 className="text-3xl font-bold tracking-tight">
 						LLM Provider Settings

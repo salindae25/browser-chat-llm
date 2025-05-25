@@ -60,7 +60,6 @@ export const fetchChat = async () => {
 				activeMessage: s.activeMessage + text,
 			}));
 		}
-
 		const newAssistantMessage: CoreAssistantMessage = {
 			role: "assistant",
 			content: await result.text,
@@ -70,6 +69,7 @@ export const fetchChat = async () => {
 			...(oldMessages?.messages ?? []),
 			newAssistantMessage,
 		]);
+
 		activeChatStore.setState((s) => ({
 			...s,
 			generating: false,
@@ -176,6 +176,7 @@ export const updateChatSessionMessages = async (
 export const regenerateFromMessageIndex = async (
 	messageIndex: number,
 	chatId: string,
+
 	abortController: AbortController | null,
 ) => {
 	const chatSession = await db.chatSessions.get(chatId);
