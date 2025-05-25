@@ -126,6 +126,7 @@ export const createNewChatSession = async () => {
 		title: "New Chat",
 		projectId: undefined,
 		tags: [],
+		systemMessage: "You are a helpful assistant.",
 		createdAt: new Date(),
 		updatedAt: new Date(),
 		messages: [],
