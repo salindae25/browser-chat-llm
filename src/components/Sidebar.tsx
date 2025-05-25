@@ -245,7 +245,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 					</Link>
 				</SidebarGroup>
 			</SidebarContent>
-			<SidebarFooter>
+			{/* <SidebarFooter>
 				<SidebarMenu>
 					<SidebarMenuItem>
 						<DropdownMenu>
@@ -323,7 +323,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 						</DropdownMenu>
 					</SidebarMenuItem>
 				</SidebarMenu>
-			</SidebarFooter>
+			</SidebarFooter> */}
 			<SidebarRail />
 		</Sidebar>
 	);

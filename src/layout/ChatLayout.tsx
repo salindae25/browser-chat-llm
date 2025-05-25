@@ -1,3 +1,4 @@
+import ChatSystemPrompt from "@/components/Chat/chat-system-prompt";
 import { AppSidebar } from "@/components/Sidebar";
 import { SidebarInset } from "@/components/ui/sidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -12,8 +13,9 @@ const ChatLayout = ({ children }: { children: ReactNode }) => {
 			<AppSidebar />
 			<SidebarInset className="overflow-hidden max-h-screen">
 				<header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
-					<div className="flex items-center gap-2 px-4">
+					<div className="flex items-center gap-2 px-4 w-full">
 						<SidebarTrigger className="-ml-1" />
+						<ChatSystemPrompt className="mr-2 ml-auto" />
 					</div>
 				</header>
 				{children}

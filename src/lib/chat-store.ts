@@ -8,10 +8,12 @@ const activeChatStore = new Store<{
 	chatModelId: string | undefined;
 	chatProvider: string | undefined;
 	abortController: AbortController | null;
+	systemMessage: string;
 	chatId: string;
 }>({
 	chatId: "",
 	activeMessage: "",
+	systemMessage: "You are a helpful assistant.",
 	userMessage: "",
 	generating: false,
 	chatModelId: undefined,

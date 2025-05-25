@@ -50,7 +50,7 @@ export const fetchChat = async () => {
 	try {
 		const result = await streamText({
 			model: currentLlm,
-			system: "You are a helpful assistant.",
+			system: activeChatStore.state.systemMessage,
 			messages: oldMessages?.messages ?? [],
 			abortSignal: activeChatStore.state.abortController?.signal,
 		});
@@ -152,6 +152,7 @@ export const loadChatSession = async (chatId: string) => {
 		chatId: chatId,
 		chatModelId: chatSession.chatModelId,
 		chatProvider: chatSession.chatProvider,
+		systemMessage: chatSession.systemMessage ?? "You are a helpful assistant.",
 	}));
 };
 
@@ -170,7 +171,11 @@ export const updateChatSessionMessages = async (
 	chatId: string,
 	messages: CoreMessage[],
 ) => {
-	await db.chatSessions.update(chatId, { messages, updatedAt: new Date() });
+	await db.chatSessions.update(chatId, {
+		messages,
+		updatedAt: new Date(),
+		systemMessage: activeChatStore.state.systemMessage,
+	});
 };
 
 export const regenerateFromMessageIndex = async (
@@ -193,7 +198,7 @@ export const regenerateFromMessageIndex = async (
 	}
 	const { textStream } = streamText({
 		model: currentLlm,
-		system: "You are a helpful assistant.",
+		system: activeChatStore.state.systemMessage,
 		messages: oldMessages,
 		abortSignal: abortController?.signal,
 	});

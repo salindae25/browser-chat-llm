@@ -7,7 +7,7 @@ import { useStore } from "@tanstack/react-store";
 import type { CoreMessage } from "ai";
 import { useLiveQuery } from "dexie-react-hooks";
 import { CopyIcon, RefreshCcwIcon, Trash2Icon } from "lucide-react";
-import { memo } from "react";
+import { memo, useMemo } from "react";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
 import { MarkdownText } from "../ui/markdown-text";
@@ -77,6 +77,29 @@ const MessageItem = ({
 	copyToClipboard: (text: string) => void;
 }) => {
 	const isUserMessage = data.role === "user";
+	const { isThinkToken, thinkingText, content } = useMemo(() => {
+		if (typeof data.content !== "string") {
+			return { isThinkToken: false, thinkingText: "", content: data.content };
+		}
+		if (data.content.includes("<think>")) {
+			if (data.content.includes("</think>")) {
+				const content = data.content.split("</think>");
+				return {
+					thinkingText: content[0].replace("<think>", ""),
+					content: content[1],
+					isThinkToken: true,
+				};
+				// biome-ignore lint/style/noUselessElse: <explanation>
+			} else {
+				return {
+					isThinkToken: true,
+					thinkingText: data.content.replace("<think>", ""),
+					content: "",
+				};
+			}
+		}
+		return { isThinkToken: false, thinkingText: "", content: data.content };
+	}, [data.content]);
 	return (
 		<div
 			className={cn("flex gap-3 w-full", {
@@ -95,14 +118,34 @@ const MessageItem = ({
 						"bg-primary": !isUserMessage,
 						"bg-secondary-background border": isUserMessage,
 					})}
+					style={{
+						// @ts-ignore
+						"--pre-background": "oklch(0% 0 0)",
+					}}
 				>
-					{typeof data.content === "string" &&
+					{isThinkToken && (
+						<div className="flex flex-col bg-background/50 p-2 rounded-base">
+							<span className="bg-main/20 rounded-base px-2 py-1 text-foreground/50">
+								Thinking...
+							</span>
+							<p
+								className="text-foreground/50 text-base"
+								style={{
+									// @ts-ignore
+									"--pre-background": "oklch(40% 0 0)",
+								}}
+							>
+								<MarkdownText includeRaw={isUserMessage}>
+									{thinkingText}
+								</MarkdownText>
+							</p>
+						</div>
+					)}
+					{typeof content === "string" &&
 						(!isUserMessage ? (
-							<MarkdownText includeRaw={isUserMessage}>
-								{data.content}
-							</MarkdownText>
+							<MarkdownText includeRaw={isUserMessage}>{content}</MarkdownText>
 						) : (
-							data.content
+							content
 						))}
 				</div>
 				<div

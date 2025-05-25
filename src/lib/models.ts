@@ -3,6 +3,7 @@ import type { CoreMessage } from "ai";
 export interface ChatSession {
 	id: string;
 	messages: CoreMessage[];
+	systemMessage: string;
 	forkedChatIds: string[] | undefined;
 	projectId: string | undefined;
 	tags: string[];
