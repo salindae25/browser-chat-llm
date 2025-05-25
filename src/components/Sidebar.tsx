@@ -1,40 +1,12 @@
 import {
-	BadgeCheck,
-	Bell,
-	ChevronsUpDown,
-	CogIcon,
-	CreditCard,
-	LogOut,
-	Plus,
-	RefreshCw,
-	Sparkles,
-	Trash,
-} from "lucide-react";
-import { useEffect, useState } from "react";
-
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuGroup,
-	DropdownMenuItem,
-	DropdownMenuLabel,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
 	SIDEBAR_COOKIE_NAME,
 	Sidebar,
 	SidebarContent,
-	SidebarFooter,
 	SidebarGroup,
 	SidebarGroupLabel,
 	SidebarHeader,
-	SidebarMenu,
 	SidebarMenuButton,
-	SidebarMenuItem,
 	SidebarRail,
-	useSidebar,
 } from "@/components/ui/sidebar";
 import { activeChatStore, sideBarStore } from "@/lib/chat-store";
 import { db } from "@/lib/db";
@@ -49,6 +21,8 @@ import { Link, useLocation } from "@tanstack/react-router";
 import { useNavigate } from "@tanstack/react-router";
 import { useStore } from "@tanstack/react-store";
 import { useLiveQuery } from "dexie-react-hooks";
+import { CogIcon, Plus, RefreshCw, Sparkles, Trash } from "lucide-react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 // This is sample data.
 
@@ -133,14 +107,13 @@ const ChatSessionItem = ({
 	);
 };
 
-const data = {
-	user: {
-		name: "Shadcn",
-		email: "shadcn@gmail.com",
-	},
-};
+// const data = {
+// 	user: {
+// 		name: "Shadcn",
+// 		email: "shadcn@gmail.com",
+// 	},
+// };
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-	const { isMobile } = useSidebar();
 	const navigate = useNavigate();
 	const location = useLocation();
 	const sideBarOpen = useStore(sideBarStore, (s) => s.open);
@@ -245,7 +218,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 					</Link>
 				</SidebarGroup>
 			</SidebarContent>
-			<SidebarFooter>
+			{/* <SidebarFooter>
 				<SidebarMenu>
 					<SidebarMenuItem>
 						<DropdownMenu>
@@ -323,7 +296,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 						</DropdownMenu>
 					</SidebarMenuItem>
 				</SidebarMenu>
-			</SidebarFooter>
+			</SidebarFooter> */}
 			<SidebarRail />
 		</Sidebar>
 	);

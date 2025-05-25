@@ -1,6 +1,7 @@
 import type { FC } from "react";
 import { PrismAsyncLight as SyntaxHighlighterPrism } from "react-syntax-highlighter";
 import { coldarkDark } from "react-syntax-highlighter/dist/cjs/styles/prism";
+
 import python from "react-syntax-highlighter/dist/esm/languages/prism/python";
 import tsx from "react-syntax-highlighter/dist/esm/languages/prism/tsx";
 
