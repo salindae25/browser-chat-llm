@@ -10,7 +10,7 @@ import { CopyIcon, RefreshCcwIcon, Trash2Icon } from "lucide-react";
 import { memo } from "react";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
-import MarkdownRenderer from "./markdown-render";
+import { MarkdownText } from "../ui/markdown-text";
 
 export const MessagesSection = memo(() => {
 	const chatId = useStore(activeChatStore, (s) => s.chatId);
@@ -88,11 +88,14 @@ const MessageItem = ({
 						"bg-secondary-background border": isUserMessage,
 					})}
 				>
-					{typeof data.content === "string" && (
-						<MarkdownRenderer includeRaw={!isUserMessage}>
-							{data.content.replace(/(\[.*?\])/g, "$1\n")}
-						</MarkdownRenderer>
-					)}
+					{typeof data.content === "string" &&
+						(!isUserMessage ? (
+							<MarkdownText includeRaw={isUserMessage}>
+								{data.content}
+							</MarkdownText>
+						) : (
+							data.content
+						))}
 				</div>
 				<div
 					className={cn("relative flex gap-1 cursor-pointer", {
