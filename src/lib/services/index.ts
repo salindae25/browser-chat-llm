@@ -176,7 +176,7 @@ export const regenerateFromMessageIndex = async (
 		return;
 	}
 	const messages = chatSession.messages;
-	const oldMessages = messages.slice(0, messageIndex + 1);
+	const oldMessages = messages.slice(0, messageIndex);
 	activeChatStore.setState((s) => ({ ...s, generating: true }));
 	await updateChatSessionMessages(chatId, oldMessages);
 	const currentLlm = await getChatLlm();

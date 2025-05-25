@@ -23,10 +23,9 @@ export const MessagesSection = memo(() => {
 		messageIndex: number,
 	) => {
 		if (!isUserMessage) {
-			// TODO: implement forking
+			await regenerateFromMessageIndex(messageIndex, chatId);
 			return;
 		}
-		await regenerateFromMessageIndex(messageIndex, chatId);
 	};
 	const deleteChatMessage = async (messageIndex: number) => {
 		await db.chatSessions.update(chatId, {
@@ -102,7 +101,7 @@ const MessageItem = ({
 						"-bottom-0 -left-1": isUserMessage,
 					})}
 				>
-					{isUserMessage && (
+					{!isUserMessage && (
 						<>
 							<Button
 								aria-label="Delete message and following messages"
