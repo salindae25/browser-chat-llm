@@ -1,5 +1,4 @@
 import { Store } from "@tanstack/react-store";
-import type { CoreMessage } from "ai";
 import type { LLMModel } from "./models";
 
 const activeChatStore = new Store<{
@@ -8,6 +7,7 @@ const activeChatStore = new Store<{
 	generating: boolean;
 	chatModelId: string | undefined;
 	chatProvider: string | undefined;
+	abortController: AbortController | null;
 	chatId: string;
 }>({
 	chatId: "",
@@ -16,10 +16,7 @@ const activeChatStore = new Store<{
 	generating: false,
 	chatModelId: undefined,
 	chatProvider: undefined,
-});
-
-const messageStore = new Store<{ messages: CoreMessage[] }>({
-	messages: [],
+	abortController: null,
 });
 
 const sideBarStore = new Store<{ open: boolean }>({
@@ -28,4 +25,4 @@ const sideBarStore = new Store<{ open: boolean }>({
 const modelStore = new Store<{ models: LLMModel[] }>({
 	models: [],
 });
-export { activeChatStore, messageStore, sideBarStore, modelStore };
+export { activeChatStore, sideBarStore, modelStore };

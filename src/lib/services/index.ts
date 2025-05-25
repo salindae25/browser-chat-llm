@@ -7,13 +7,14 @@ import {
 	streamText,
 } from "ai";
 import { z } from "zod";
-import { activeChatStore, messageStore } from "../chat-store";
+import { activeChatStore } from "../chat-store";
 import { db } from "../db";
 import { getChatLlm, getTitleLlm } from "./providers"; // Import the async functions
 export const fetchChat = async () => {
 	activeChatStore.setState((s) => ({
 		...s,
 		generating: true,
+		abortController: new AbortController(),
 		activeMessage: "",
 	}));
 	const newUserMessage: CoreUserMessage = {
@@ -46,32 +47,41 @@ export const fetchChat = async () => {
 		]);
 		return;
 	}
+	try {
+		const result = await streamText({
+			model: currentLlm,
+			system: "You are a helpful assistant.",
+			messages: oldMessages?.messages ?? [],
+			abortSignal: activeChatStore.state.abortController?.signal,
+		});
+		for await (const text of result.textStream) {
+			activeChatStore.setState((s) => ({
+				...s,
+				activeMessage: s.activeMessage + text,
+			}));
+		}
+		const newAssistantMessage: CoreAssistantMessage = {
+			role: "assistant",
+			content: await result.text,
+		};
 
-	const { textStream } = streamText({
-		model: currentLlm,
-		system: "You are a helpful assistant.",
-		messages: oldMessages?.messages ?? [],
-	});
-	for await (const text of textStream) {
+		await updateChatSessionMessages(activeChatStore.state.chatId, [
+			...(oldMessages?.messages ?? []),
+			newAssistantMessage,
+		]);
+
 		activeChatStore.setState((s) => ({
 			...s,
-			activeMessage: s.activeMessage + text,
+			generating: false,
+			activeMessage: "",
+		}));
+	} catch (ex) {
+		activeChatStore.setState((s) => ({
+			...s,
+			generating: false,
+			activeMessage: `Error: ${ex}`,
 		}));
 	}
-	const newAssistantMessage: CoreAssistantMessage = {
-		role: "assistant",
-		content: activeChatStore.state.activeMessage,
-	};
-
-	await updateChatSessionMessages(activeChatStore.state.chatId, [
-		...(oldMessages?.messages ?? []),
-		newAssistantMessage,
-	]);
-	activeChatStore.setState((s) => ({
-		...s,
-		generating: false,
-		activeMessage: "",
-	}));
 };
 
 export const titleGenerate = async (chatId?: string) => {
@@ -84,12 +94,10 @@ export const titleGenerate = async (chatId?: string) => {
 		});
 		return;
 	}
-	let messages = [];
+	let messages: CoreMessage[] = [];
 	if (chatId) {
 		const chatSession = await db.chatSessions.get(chatId);
 		messages = chatSession?.messages || [];
-	} else {
-		messages = messageStore.state.messages;
 	}
 	const { object: output } = await generateObject({
 		model: currentTitleLlm,
@@ -131,7 +139,6 @@ export const createNewChatSession = async () => {
 		chatModelId: chatModelId,
 		chatProvider: chatProvider,
 	}));
-	messageStore.setState((s) => ({ ...s, messages: [] }));
 	return newChatId;
 };
 
@@ -155,7 +162,6 @@ export const deleteChatSession = async (
 	await db.chatSessions.delete(chatId);
 	if (activeChatStore.state.chatId === chatId) {
 		activeChatStore.setState((s) => ({ ...s, chatId: "" }));
-		messageStore.setState((s) => ({ ...s, messages: [] }));
 		navigate({ to: "/" });
 	}
 };
@@ -170,13 +176,15 @@ export const updateChatSessionMessages = async (
 export const regenerateFromMessageIndex = async (
 	messageIndex: number,
 	chatId: string,
+
+	abortController: AbortController | null,
 ) => {
 	const chatSession = await db.chatSessions.get(chatId);
 	if (!chatSession) {
 		return;
 	}
 	const messages = chatSession.messages;
-	const oldMessages = messages.slice(0, messageIndex + 1);
+	const oldMessages = messages.slice(0, messageIndex);
 	activeChatStore.setState((s) => ({ ...s, generating: true }));
 	await updateChatSessionMessages(chatId, oldMessages);
 	const currentLlm = await getChatLlm();
@@ -187,6 +195,7 @@ export const regenerateFromMessageIndex = async (
 		model: currentLlm,
 		system: "You are a helpful assistant.",
 		messages: oldMessages,
+		abortSignal: abortController?.signal,
 	});
 	for await (const text of textStream) {
 		activeChatStore.setState((s) => ({

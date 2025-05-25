@@ -10,7 +10,7 @@ import { CopyIcon, RefreshCcwIcon, Trash2Icon } from "lucide-react";
 import { memo } from "react";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
-import MarkdownRenderer from "./markdown-render";
+import { MarkdownText } from "../ui/markdown-text";
 
 export const MessagesSection = memo(() => {
 	const chatId = useStore(activeChatStore, (s) => s.chatId);
@@ -23,10 +23,18 @@ export const MessagesSection = memo(() => {
 		messageIndex: number,
 	) => {
 		if (!isUserMessage) {
-			// TODO: implement forking
+			activeChatStore.setState((s) => ({
+				...s,
+				generating: true,
+				abortController: new AbortController(),
+			}));
+			await regenerateFromMessageIndex(
+				messageIndex,
+				chatId,
+				activeChatStore.state.abortController,
+			);
 			return;
 		}
-		await regenerateFromMessageIndex(messageIndex, chatId);
 	};
 	const deleteChatMessage = async (messageIndex: number) => {
 		await db.chatSessions.update(chatId, {
@@ -88,10 +96,54 @@ const MessageItem = ({
 						"bg-secondary-background border": isUserMessage,
 					})}
 				>
-					{typeof data.content === "string" && (
-						<MarkdownRenderer includeRaw={!isUserMessage}>
-							{data.content.replace(/(\[.*?\])/g, "$1\n")}
-						</MarkdownRenderer>
+					{typeof data.content === "string" &&
+						(!isUserMessage ? (
+							<MarkdownText includeRaw={isUserMessage}>
+								{data.content}
+							</MarkdownText>
+						) : (
+							data.content
+						))}
+				</div>
+				<div
+					className={cn("relative flex gap-1 cursor-pointer", {
+						"-bottom-0 -left-1": isUserMessage,
+					})}
+				>
+					{!isUserMessage && (
+						<>
+							<Button
+								aria-label="Delete message and following messages"
+								variant="noShadowNeutral"
+								className="size-8 border-none cursor-pointer"
+								size="icon"
+								onClick={() => deleteChatMessage(messageIndex)}
+							>
+								<Trash2Icon />
+							</Button>
+							<Button
+								aria-label="Regenerate message from this point"
+								variant="noShadowNeutral"
+								className="size-8 border-none cursor-pointer"
+								size="icon"
+								onClick={() =>
+									regenerateFromMessage(isUserMessage, messageIndex)
+								}
+							>
+								<RefreshCcwIcon />
+							</Button>
+						</>
+					)}
+					{!isUserMessage && (
+						<Button
+							aria-label="Copy message"
+							variant="noShadowNeutral"
+							className="size-8 border-none cursor-pointer"
+							size="icon"
+							onClick={() => copyToClipboard(data.content as string)}
+						>
+							<CopyIcon />
+						</Button>
 					)}
 				</div>
 				<div
