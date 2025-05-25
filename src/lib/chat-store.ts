@@ -8,6 +8,7 @@ const activeChatStore = new Store<{
 	generating: boolean;
 	chatModelId: string | undefined;
 	chatProvider: string | undefined;
+	abortController: AbortController | null;
 	chatId: string;
 }>({
 	chatId: "",
@@ -16,6 +17,7 @@ const activeChatStore = new Store<{
 	generating: false,
 	chatModelId: undefined,
 	chatProvider: undefined,
+	abortController: null,
 });
 
 const messageStore = new Store<{ messages: CoreMessage[] }>({

@@ -23,7 +23,16 @@ export const MessagesSection = memo(() => {
 		messageIndex: number,
 	) => {
 		if (!isUserMessage) {
-			await regenerateFromMessageIndex(messageIndex, chatId);
+			activeChatStore.setState((s) => ({
+				...s,
+				generating: true,
+				abortController: new AbortController(),
+			}));
+			await regenerateFromMessageIndex(
+				messageIndex,
+				chatId,
+				activeChatStore.state.abortController,
+			);
 			return;
 		}
 	};

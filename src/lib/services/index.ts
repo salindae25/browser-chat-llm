@@ -14,6 +14,7 @@ export const fetchChat = async () => {
 	activeChatStore.setState((s) => ({
 		...s,
 		generating: true,
+		abortController: new AbortController(),
 		activeMessage: "",
 	}));
 	const newUserMessage: CoreUserMessage = {
@@ -46,32 +47,41 @@ export const fetchChat = async () => {
 		]);
 		return;
 	}
+	try {
+		const result = await streamText({
+			model: currentLlm,
+			system: "You are a helpful assistant.",
+			messages: oldMessages?.messages ?? [],
+			abortSignal: activeChatStore.state.abortController?.signal,
+		});
+		for await (const text of result.textStream) {
+			activeChatStore.setState((s) => ({
+				...s,
+				activeMessage: s.activeMessage + text,
+			}));
+		}
 
-	const { textStream } = streamText({
-		model: currentLlm,
-		system: "You are a helpful assistant.",
-		messages: oldMessages?.messages ?? [],
-	});
-	for await (const text of textStream) {
+		const newAssistantMessage: CoreAssistantMessage = {
+			role: "assistant",
+			content: await result.text,
+		};
+
+		await updateChatSessionMessages(activeChatStore.state.chatId, [
+			...(oldMessages?.messages ?? []),
+			newAssistantMessage,
+		]);
 		activeChatStore.setState((s) => ({
 			...s,
-			activeMessage: s.activeMessage + text,
+			generating: false,
+			activeMessage: "",
+		}));
+	} catch (ex) {
+		activeChatStore.setState((s) => ({
+			...s,
+			generating: false,
+			activeMessage: `Error: ${ex}`,
 		}));
 	}
-	const newAssistantMessage: CoreAssistantMessage = {
-		role: "assistant",
-		content: activeChatStore.state.activeMessage,
-	};
-
-	await updateChatSessionMessages(activeChatStore.state.chatId, [
-		...(oldMessages?.messages ?? []),
-		newAssistantMessage,
-	]);
-	activeChatStore.setState((s) => ({
-		...s,
-		generating: false,
-		activeMessage: "",
-	}));
 };
 
 export const titleGenerate = async (chatId?: string) => {
@@ -170,6 +180,7 @@ export const updateChatSessionMessages = async (
 export const regenerateFromMessageIndex = async (
 	messageIndex: number,
 	chatId: string,
+	abortController: AbortController | null,
 ) => {
 	const chatSession = await db.chatSessions.get(chatId);
 	if (!chatSession) {
@@ -187,6 +198,7 @@ export const regenerateFromMessageIndex = async (
 		model: currentLlm,
 		system: "You are a helpful assistant.",
 		messages: oldMessages,
+		abortSignal: abortController?.signal,
 	});
 	for await (const text of textStream) {
 		activeChatStore.setState((s) => ({
