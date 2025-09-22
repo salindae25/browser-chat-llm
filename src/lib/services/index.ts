@@ -109,7 +109,6 @@ export const titleGenerate = async (chatId?: string) => {
 			title: z.string(),
 		}),
 	});
-	console.log(output.title);
 	db.chatSessions.update(chatId ? chatId : activeChatStore.state.chatId, {
 		title: output.title,
 	});

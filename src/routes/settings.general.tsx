@@ -276,7 +276,6 @@ export const SettingsGeneral = () => {
 										<Select
 											value={`${settings.chatLlmProviderId}-${settings.chatLlmModelId || ""}`}
 											onValueChange={(value) => {
-												console.log(value);
 												const selectedModel = availableModels.find(
 													(m) => m.id === value,
 												);
