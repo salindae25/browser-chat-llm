@@ -85,10 +85,6 @@ export const getChatLlm = async (): Promise<LanguageModel | null> => {
 				`Globally configured chat LLM provider ID '${providerId}' not found. Falling back.`,
 			);
 		}
-	} else {
-		console.log(
-			"No global chat LLM configured or configuration incomplete. Falling back to default chat LLM logic.",
-		);
 	}
 	return null;
 };
@@ -113,10 +109,6 @@ export const getTitleLlm = async (): Promise<LanguageModel | null> => {
 				`Globally configured title LLM provider ID '${providerId}' not found. Falling back.`,
 			);
 		}
-	} else {
-		console.log(
-			"No global title LLM configured or configuration incomplete. Falling back to default title LLM logic.",
-		);
 	}
 	return null;
 };
